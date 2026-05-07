@@ -38,13 +38,26 @@ def _load_all_venues(data_dir: Path) -> list[dict]:
         except Exception:
             continue
 
-    return venues
+    return _deduplicate(venues)
 
 
 def _city_from_key(key: str) -> str:
     """Extract city name from file key like 'stuttgart-west-restaurant'."""
     parts = key.rsplit("-", 1)
     return parts[0].replace("-", " ").title() if parts else key.title()
+
+
+def _deduplicate(venues: list[dict]) -> list[dict]:
+    """Remove duplicate venues by URL, keeping the most recently scraped."""
+    seen: dict[str, dict] = {}
+    for v in venues:
+        url = v.get("url", "")
+        if not url:
+            continue
+        existing = seen.get(url)
+        if existing is None or v.get("scraped_at", "") > existing.get("scraped_at", ""):
+            seen[url] = v
+    return list(seen.values())
 
 
 def _parse_venue(row: dict, city: str, dataset_key: str, scraped_at: str) -> dict:
@@ -186,18 +199,15 @@ def _build_body(mount: str) -> str:
         <div class="chart-card">
             <h3>Top Offenders by % Deleted</h3>
             <div class="chart-toggle">
-                <button class="mini-btn active" onclick="setBarMode('pct')">% Deleted</button>
-                <button class="mini-btn" onclick="setBarMode('abs')">Absolute</button>
+                <button class="mini-btn active" onclick="setBarMode('pct', this)">% Deleted</button>
+                <button class="mini-btn" onclick="setBarMode('abs', this)">Absolute</button>
             </div>
-            <canvas id="bar-chart" height="400"></canvas>
+            <canvas id="bar-chart"></canvas>
+            <div class="chart-pagination" id="bar-pagination"></div>
         </div>
         <div class="chart-card">
-            <h3>Rating Gap: Current vs Real Score</h3>
-            <canvas id="scatter-chart" height="350"></canvas>
-        </div>
-        <div class="chart-card">
-            <h3>Deletions by City &amp; Type</h3>
-            <canvas id="breakdown-chart" height="300"></canvas>
+            <h3>Rating Inflation: Current vs Real Score</h3>
+            <canvas id="gap-chart"></canvas>
         </div>
     </div>
 </div>
@@ -206,16 +216,16 @@ def _build_body(mount: str) -> str:
     <div id="map-container" style="height:600px;border-radius:12px;overflow:hidden;"></div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/chart.js@4/dist/chart.umd.min.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
 const API = "{mount}";
 let allVenues = [], stats = {{}};
 let sortCol = "percentage_deleted", sortAsc = false;
-let barMode = "pct";
-let barChart = null, scatterChart = null, breakdownChart = null;
+let barMode = "pct", barPage = 0;
+let barChart = null, gapChart = null;
 let leafletMap = null, markerLayer = null;
 
 async function init() {{
@@ -337,99 +347,84 @@ function renderActiveView() {{
 }}
 
 // -- Charts --
+const BAR_PAGE_SIZE = 10;
+
 function renderCharts() {{
     const venues = getFiltered().filter(v => v.has_deletions);
     renderBarChart(venues);
-    renderScatterChart(venues);
-    renderBreakdownChart(venues);
+    renderGapChart(venues);
 }}
 
-function setBarMode(mode) {{
+function setBarMode(mode, btn) {{
     barMode = mode;
+    barPage = 0;
     document.querySelectorAll(".chart-card .mini-btn").forEach(b => b.classList.remove("active"));
-    event.target.classList.add("active");
+    btn.classList.add("active");
     renderBarChart(getFiltered().filter(v => v.has_deletions));
 }}
 
+function barPrev() {{ barPage--; renderBarChart(getFiltered().filter(v => v.has_deletions)); }}
+function barNext() {{ barPage++; renderBarChart(getFiltered().filter(v => v.has_deletions)); }}
+
 function renderBarChart(venues) {{
-    const sorted = [...venues].sort((a, b) => barMode === "pct" ? b.percentage_deleted - a.percentage_deleted : b.deleted_estimate - a.deleted_estimate).slice(0, 20);
-    const labels = sorted.map(v => v.name.length > 25 ? v.name.slice(0, 22) + "..." : v.name);
-    const values = sorted.map(v => barMode === "pct" ? v.percentage_deleted : v.deleted_estimate);
-    const colors = sorted.map(v => v.percentage_deleted >= 10 ? "#ef4444" : v.percentage_deleted >= 5 ? "#f59e0b" : "#22c55e");
+    const sorted = [...venues].sort((a, b) => barMode === "pct" ? b.percentage_deleted - a.percentage_deleted : b.deleted_estimate - a.deleted_estimate);
+    const totalPages = Math.max(1, Math.ceil(sorted.length / BAR_PAGE_SIZE));
+    barPage = Math.max(0, Math.min(barPage, totalPages - 1));
+    const page = sorted.slice(barPage * BAR_PAGE_SIZE, (barPage + 1) * BAR_PAGE_SIZE);
+
+    const labels = page.map(v => v.name.length > 30 ? v.name.slice(0, 27) + "..." : v.name);
+    const values = page.map(v => barMode === "pct" ? v.percentage_deleted : v.deleted_estimate);
+    const colors = page.map(v => v.percentage_deleted >= 10 ? "#ef4444" : v.percentage_deleted >= 5 ? "#f59e0b" : "#22c55e");
 
     if (barChart) barChart.destroy();
     barChart = new Chart(document.getElementById("bar-chart"), {{
         type: "bar",
-        data: {{ labels, datasets: [{{ data: values, backgroundColor: colors, borderRadius: 4 }}] }},
+        data: {{ labels, datasets: [{{ data: values, backgroundColor: colors, borderRadius: 3, barThickness: 18 }}] }},
         options: {{
             indexAxis: "y",
+            maintainAspectRatio: false,
             plugins: {{ legend: {{ display: false }}, tooltip: {{ callbacks: {{ label: ctx => barMode === "pct" ? ctx.raw.toFixed(1) + "%" : "~" + Math.round(ctx.raw) + " reviews" }} }} }},
             scales: {{ x: {{ title: {{ display: true, text: barMode === "pct" ? "% Deleted" : "Deleted Reviews (est.)" }} }} }}
         }}
     }});
+
+    // Pagination controls
+    const pagDiv = document.getElementById("bar-pagination");
+    pagDiv.innerHTML = sorted.length > BAR_PAGE_SIZE
+        ? `<button class="pag-btn" onclick="barPrev()" ${{barPage === 0 ? 'disabled' : ''}}>\u25c0 Prev</button>
+           <span class="pag-info">Page ${{barPage + 1}} of ${{totalPages}}</span>
+           <button class="pag-btn" onclick="barNext()" ${{barPage >= totalPages - 1 ? 'disabled' : ''}}> Next \u25b6</button>`
+        : '';
 }}
 
-function renderScatterChart(venues) {{
-    const data = venues.filter(v => v.current_rating && v.real_score).map(v => ({{
-        x: v.current_rating, y: v.real_score,
-        r: Math.max(4, Math.min(20, Math.sqrt(v.deleted_estimate) * 1.5)),
-        label: v.name, deleted: v.deleted_estimate
-    }}));
+function renderGapChart(venues) {{
+    const sorted = [...venues].filter(v => v.rating_gap > 0 && v.current_rating && v.real_score)
+        .sort((a, b) => b.rating_gap - a.rating_gap).slice(0, 15);
 
-    if (scatterChart) scatterChart.destroy();
-    scatterChart = new Chart(document.getElementById("scatter-chart"), {{
-        type: "bubble",
-        data: {{ datasets: [{{
-            data, backgroundColor: "rgba(239,68,68,0.5)", borderColor: "rgba(239,68,68,0.8)", borderWidth: 1
-        }}] }},
+    const labels = sorted.map(v => v.name.length > 30 ? v.name.slice(0, 27) + "..." : v.name);
+    const realScores = sorted.map(v => v.real_score);
+    const gaps = sorted.map(v => v.rating_gap);
+
+    if (gapChart) gapChart.destroy();
+    gapChart = new Chart(document.getElementById("gap-chart"), {{
+        type: "bar",
+        data: {{
+            labels,
+            datasets: [
+                {{ label: "Real Score", data: realScores, backgroundColor: "#3b82f6", borderRadius: {{ topLeft: 3, bottomLeft: 3 }}, barThickness: 18 }},
+                {{ label: "Inflated By", data: gaps, backgroundColor: "#ef4444", borderRadius: {{ topRight: 3, bottomRight: 3 }}, barThickness: 18 }}
+            ]
+        }},
         options: {{
+            indexAxis: "y",
+            maintainAspectRatio: false,
             plugins: {{
-                legend: {{ display: false }},
-                tooltip: {{ callbacks: {{ label: ctx => `${{ctx.raw.label}}: ${{ctx.raw.x}}\u2b50 \u2192 ${{ctx.raw.y.toFixed(1)}}\u2b50 (~${{Math.round(ctx.raw.deleted)}} deleted)` }} }}
+                tooltip: {{ callbacks: {{ label: ctx => ctx.datasetIndex === 0 ? `Real: ${{ctx.raw.toFixed(2)}}\u2b50` : `Inflated: +${{ctx.raw.toFixed(2)}}` }} }},
+                legend: {{ position: "top", labels: {{ boxWidth: 12, padding: 16 }} }}
             }},
             scales: {{
-                x: {{ title: {{ display: true, text: "Current Rating" }}, min: 3.5, max: 5.1 }},
-                y: {{ title: {{ display: true, text: "Real Score" }}, min: 3.0, max: 5.1 }}
-            }}
-        }}
-    }});
-    // Draw diagonal reference line
-    const origDraw = scatterChart.draw.bind(scatterChart);
-    scatterChart.draw = function() {{
-        origDraw();
-        const xScale = scatterChart.scales.x, yScale = scatterChart.scales.y;
-        const ctx = scatterChart.ctx;
-        ctx.save();
-        ctx.strokeStyle = "rgba(0,0,0,0.15)";
-        ctx.setLineDash([5, 5]);
-        ctx.beginPath();
-        ctx.moveTo(xScale.getPixelForValue(3.5), yScale.getPixelForValue(3.5));
-        ctx.lineTo(xScale.getPixelForValue(5), yScale.getPixelForValue(5));
-        ctx.stroke();
-        ctx.restore();
-    }};
-    scatterChart.draw();
-}}
-
-function renderBreakdownChart(venues) {{
-    const groups = {{}};
-    venues.forEach(v => {{
-        const key = `${{v.city}} \u2014 ${{v.venue_type || "other"}}`;
-        groups[key] = (groups[key] || 0) + v.deleted_estimate;
-    }});
-    const sorted = Object.entries(groups).sort((a, b) => b[1] - a[1]);
-    const labels = sorted.map(e => e[0]);
-    const values = sorted.map(e => Math.round(e[1]));
-    const palette = ["#ef4444","#f59e0b","#3b82f6","#8b5cf6","#22c55e","#ec4899","#14b8a6","#f97316"];
-
-    if (breakdownChart) breakdownChart.destroy();
-    breakdownChart = new Chart(document.getElementById("breakdown-chart"), {{
-        type: "doughnut",
-        data: {{ labels, datasets: [{{ data: values, backgroundColor: palette.slice(0, labels.length), borderWidth: 2, borderColor: "#fff" }}] }},
-        options: {{
-            plugins: {{
-                legend: {{ position: "right" }},
-                tooltip: {{ callbacks: {{ label: ctx => `${{ctx.label}}: ~${{ctx.raw}} deleted reviews` }} }}
+                x: {{ stacked: true, title: {{ display: true, text: "Rating" }}, min: 0, max: 5.2 }},
+                y: {{ stacked: true }}
             }}
         }}
     }});
@@ -511,8 +506,9 @@ def _build_css() -> str:
     .controls input, .controls select { padding: 0.5rem 0.75rem; border: 1px solid #ddd; border-radius: 0.5rem; font-size: 0.9rem; }
     .controls input { flex: 1; min-width: 180px; }
     .controls select { min-width: 130px; }
-    .toggle-label { font-size: 0.85rem; display: flex; align-items: center; gap: 0.4rem; cursor: pointer; padding: 0.5rem 0.75rem; border: 1px solid #ddd; border-radius: 0.5rem; background: white; }
-    .toggle-label input:checked + span, .toggle-label:has(input:checked) { background: #fef2f2; border-color: #fca5a5; }
+    .toggle-label { font-size: 0.85rem; display: inline-flex; align-items: center; gap: 0.3rem; cursor: pointer; padding: 0.3rem 0.6rem; border: 1px solid #ddd; border-radius: 0.5rem; background: white; white-space: nowrap; }
+    .toggle-label input { margin: 0; }
+    .toggle-label:has(input:checked) { background: #fef2f2; border-color: #fca5a5; }
 
     .view-tabs { display: flex; gap: 2px; margin-left: auto; }
     .view-tab { padding: 0.5rem 1rem; border: 1px solid #ddd; background: white; cursor: pointer; font-size: 0.85rem; border-radius: 0; }
@@ -544,13 +540,19 @@ def _build_css() -> str:
     .sev-badge.med { background: #fde68a; color: #92400e; }
     .sev-badge.low { background: #d1fae5; color: #065f46; }
 
-    .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
-    .charts-grid .chart-card:first-child { grid-column: 1 / -1; }
+    .charts-grid { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
     .chart-card { background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    .chart-card canvas { max-height: 320px; }
     .chart-card h3 { font-size: 1rem; margin-bottom: 0.75rem; color: #333; }
     .chart-toggle { margin-bottom: 0.75rem; }
     .mini-btn { padding: 4px 12px; border: 1px solid #ddd; background: white; border-radius: 4px; font-size: 0.8rem; cursor: pointer; margin-right: 4px; }
     .mini-btn.active { background: #7f1d1d; color: white; border-color: #7f1d1d; }
+
+    .chart-pagination { display: flex; align-items: center; justify-content: center; gap: 1rem; margin-top: 0.75rem; }
+    .pag-btn { padding: 4px 14px; border: 1px solid #ddd; background: white; border-radius: 4px; font-size: 0.8rem; cursor: pointer; }
+    .pag-btn:hover:not(:disabled) { background: #f5f5f5; }
+    .pag-btn:disabled { opacity: 0.4; cursor: default; }
+    .pag-info { font-size: 0.8rem; color: #666; }
 
     #map-container { box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
 
