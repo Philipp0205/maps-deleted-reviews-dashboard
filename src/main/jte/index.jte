@@ -1,50 +1,12 @@
-#!/usr/bin/env python3
-"""Build static site for GitHub Pages deployment.
+@import dashboard.model.Venue
+@import dashboard.model.Stats
+@import java.util.List
 
-Reads CSV/JSON data from the maps-deleted-reviews output directory,
-generates data.json and index.html in the docs/ folder.
+@param List<Venue> venues
+@param Stats stats
+@param String dataJson
 
-Usage:
-    python3 build_static.py [--data-dir /path/to/output]
-"""
-
-from __future__ import annotations
-
-import argparse
-import json
-from pathlib import Path
-
-# Reuse data loading from the plugin
-from dashboard_plugin import _load_all_venues, _compute_stats
-
-DOCS_DIR = Path(__file__).parent / "docs"
-
-
-def build(data_dir: Path) -> None:
-    DOCS_DIR.mkdir(exist_ok=True)
-
-    # Build data.json
-    venues = _load_all_venues(data_dir)
-    stats = _compute_stats(venues)
-    data = {"venues": venues, "stats": stats}
-    data_path = DOCS_DIR / "data.json"
-    data_path.write_text(json.dumps(data, ensure_ascii=False, indent=2))
-    print(f"Wrote {data_path} ({len(venues)} venues)")
-
-    # Build index.html
-    html = _build_html()
-    html_path = DOCS_DIR / "index.html"
-    html_path.write_text(html, encoding="utf-8")
-    print(f"Wrote {html_path}")
-
-    # CNAME for custom domain
-    cname_path = DOCS_DIR / "CNAME"
-    cname_path.write_text("public.philipp-kurrle.cloud\n")
-    print(f"Wrote {cname_path}")
-
-
-def _build_html() -> str:
-    return """<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -127,23 +89,40 @@ td a:hover { text-decoration: underline; }
 <body>
 
 <div class="header">
-    <h1>\U0001f5d1\ufe0f Deleted Reviews Dashboard</h1>
+    <h1>&#128465;&#65039; Deleted Reviews Dashboard</h1>
     <p>Google Maps venues with reviews removed due to defamation complaints</p>
-    <div class="stats-bar" id="stats-bar"></div>
+    <div class="stats-bar">
+        <span class="stat-pill">&#128205; ${stats.totalVenues()} Venues</span>
+        <span class="stat-pill warn">&#9888;&#65039; ${stats.venuesWithDeletions()} With Deletions</span>
+        <span class="stat-pill danger">&#128465;&#65039; ${stats.totalDeletedReviews()} Deleted Reviews</span>
+        <span class="stat-pill">&#128201; ${stats.avgRatingGap()} Avg Gap</span>
+        <span class="stat-pill dim">&#128336; <span id="latest-scrape">${stats.latestScrape()}</span></span>
+    </div>
 </div>
 
 <div class="controls">
     <input type="text" id="search" placeholder="Search venue name...">
-    <select id="city-filter"><option value="">All Cities</option></select>
-    <select id="type-filter"><option value="">All Types</option></select>
+    <select id="city-filter">
+        <option value="">All Cities</option>
+        @for(var city : stats.cities())
+            <option value="${city}">${city}</option>
+        @endfor
+    </select>
+    <select id="type-filter">
+        <option value="">All Types</option>
+        @for(var type : stats.venueTypes())
+            !{var label = Character.toUpperCase(type.charAt(0)) + type.substring(1);}
+            <option value="${type}">${label}</option>
+        @endfor
+    </select>
     <label class="toggle-label">
         <input type="checkbox" id="deletions-only" checked>
         Only with deletions
     </label>
     <div class="view-tabs">
-        <button class="view-tab active" data-view="table" onclick="switchView('table')">\U0001f4cb Table</button>
-        <button class="view-tab" data-view="charts" onclick="switchView('charts')">\U0001f4ca Charts</button>
-        <button class="view-tab" data-view="map" onclick="switchView('map')">\U0001f5fa\ufe0f Map</button>
+        <button class="view-tab active" data-view="table" onclick="switchView('table')">&#128203; Table</button>
+        <button class="view-tab" data-view="charts" onclick="switchView('charts')">&#128202; Charts</button>
+        <button class="view-tab" data-view="map" onclick="switchView('map')">&#128506;&#65039; Map</button>
     </div>
 </div>
 
@@ -153,18 +132,36 @@ td a:hover { text-decoration: underline; }
         <table id="venues-table">
             <thead>
                 <tr>
-                    <th data-sort="name" class="sortable">Venue \u25bf</th>
-                    <th data-sort="city" class="sortable">City \u25bf</th>
-                    <th data-sort="venue_type" class="sortable">Type \u25bf</th>
-                    <th data-sort="total_reviews" class="sortable num">Reviews \u25bf</th>
-                    <th data-sort="deleted_estimate" class="sortable num">Deleted \u25bf</th>
-                    <th data-sort="percentage_deleted" class="sortable num">% Del \u25bf</th>
-                    <th data-sort="current_rating" class="sortable num">Rating \u25bf</th>
-                    <th data-sort="real_score" class="sortable num">Real \u25bf</th>
-                    <th data-sort="rating_gap" class="sortable num">Gap \u25bf</th>
+                    <th data-sort="name" class="sortable">Venue &#9663;</th>
+                    <th data-sort="city" class="sortable">City &#9663;</th>
+                    <th data-sort="venue_type" class="sortable">Type &#9663;</th>
+                    <th data-sort="total_reviews" class="sortable num">Reviews &#9663;</th>
+                    <th data-sort="deleted_estimate" class="sortable num">Deleted &#9663;</th>
+                    <th data-sort="percentage_deleted" class="sortable num">% Del &#9663;</th>
+                    <th data-sort="current_rating" class="sortable num">Rating &#9663;</th>
+                    <th data-sort="real_score" class="sortable num">Real &#9663;</th>
+                    <th data-sort="rating_gap" class="sortable num">Gap &#9663;</th>
                 </tr>
             </thead>
-            <tbody id="venues-tbody"></tbody>
+            <tbody id="venues-tbody">
+                <%-- Pre-rendered rows (replaced by JS on filter/sort) --%>
+                @for(var v : venues)
+                    @if(v.hasDeletions())
+                        <tr class="${v.severityClass()}">
+                            !{var titleAttr = v.reviewNotice().isEmpty() ? "" : " title=\"" + v.reviewNotice() + "\"";}
+                            <td><a href="${v.url()}" target="_blank"${titleAttr}>${v.name()}</a></td>
+                            <td>${v.city()}</td>
+                            <td>${v.venueType()}</td>
+                            <td class="num">${v.totalReviews()}</td>
+                            <td class="num">${v.deletedDisplay()}</td>
+                            <td class="num">${v.percentageDisplay()} ${v.severityBadge()}</td>
+                            <td class="num">${v.ratingDisplay()}</td>
+                            <td class="num">${v.realScoreDisplay()}</td>
+                            <td class="num">${v.gapDisplay()}</td>
+                        </tr>
+                    @endif
+                @endfor
+            </tbody>
         </table>
     </div>
 </div>
@@ -195,37 +192,23 @@ td a:hover { text-decoration: underline; }
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-let allVenues = [], stats = {};
+const DATA = ${dataJson};
+@raw
+let allVenues = DATA.venues, stats = DATA.stats;
 let sortCol = "percentage_deleted", sortAsc = false;
 let barMode = "pct", barPage = 0;
 let barChart = null, gapChart = null;
 let leafletMap = null, markerLayer = null;
 
-async function init() {
-    const resp = await fetch("data.json");
-    const data = await resp.json();
-    allVenues = data.venues;
-    stats = data.stats;
-    renderStats();
-    populateFilters();
-    renderTable();
-}
-
-function renderStats() {
-    document.getElementById("stats-bar").innerHTML = `
-        <span class="stat-pill">\U0001f4cd ${stats.total_venues} Venues</span>
-        <span class="stat-pill warn">\u26a0\ufe0f ${stats.venues_with_deletions} With Deletions</span>
-        <span class="stat-pill danger">\U0001f5d1\ufe0f ${stats.total_deleted_reviews} Deleted Reviews</span>
-        <span class="stat-pill">\U0001f4c9 ${stats.avg_rating_gap} Avg Gap</span>
-        <span class="stat-pill dim">\U0001f550 ${stats.latest_scrape ? new Date(stats.latest_scrape).toLocaleDateString() : "\u2014"}</span>`;
-}
-
-function populateFilters() {
-    const cf = document.getElementById("city-filter");
-    stats.cities.forEach(c => { const o = document.createElement("option"); o.value = c; o.textContent = c; cf.appendChild(o); });
-    const tf = document.getElementById("type-filter");
-    stats.venue_types.forEach(t => { const o = document.createElement("option"); o.value = t; o.textContent = t.charAt(0).toUpperCase() + t.slice(1); tf.appendChild(o); });
-}
+// Format latest scrape date
+(function() {
+    const el = document.getElementById("latest-scrape");
+    if (stats.latest_scrape) {
+        el.textContent = new Date(stats.latest_scrape).toLocaleDateString();
+    } else {
+        el.textContent = "\u2014";
+    }
+})();
 
 function getFiltered() {
     const search = document.getElementById("search").value.toLowerCase();
@@ -255,14 +238,13 @@ function getSorted(venues) {
 function severityClass(pct) {
     if (pct >= 10) return "severity-high";
     if (pct >= 5) return "severity-med";
-    if (pct > 0) return "severity-low";
     return "";
 }
 
 function severityBadge(pct) {
-    if (pct >= 10) return '<span class="sev-badge high">\U0001f534 High</span>';
-    if (pct >= 5) return '<span class="sev-badge med">\U0001f7e1 Med</span>';
-    if (pct > 0) return '<span class="sev-badge low">\U0001f7e2 Low</span>';
+    if (pct >= 10) return '<span class="sev-badge high">\uD83D\uDD34 High</span>';
+    if (pct >= 5) return '<span class="sev-badge med">\uD83D\uDFE1 Med</span>';
+    if (pct > 0) return '<span class="sev-badge low">\uD83D\uDFE2 Low</span>';
     return "";
 }
 
@@ -282,8 +264,8 @@ function renderTable() {
             <td class="num">${v.total_reviews.toLocaleString()}</td>
             <td class="num">${v.deleted_estimate > 0 ? "~" + Math.round(v.deleted_estimate) : "\u2014"}</td>
             <td class="num">${v.percentage_deleted > 0 ? v.percentage_deleted.toFixed(1) + "%" : "\u2014"} ${severityBadge(v.percentage_deleted)}</td>
-            <td class="num">\u2b50 ${v.current_rating || "\u2014"}</td>
-            <td class="num">${v.real_score ? "\u2b50 " + v.real_score.toFixed(1) : "\u2014"}</td>
+            <td class="num">\u2B50 ${v.current_rating || "\u2014"}</td>
+            <td class="num">${v.real_score ? "\u2B50 " + v.real_score.toFixed(1) : "\u2014"}</td>
             <td class="num">${v.rating_gap > 0 ? "-" + v.rating_gap.toFixed(2) : "\u2014"}</td>
         </tr>`;
     }).join("");
@@ -292,8 +274,8 @@ function renderTable() {
 function handleSort(col) {
     if (sortCol === col) { sortAsc = !sortAsc; } else { sortCol = col; sortAsc = col === "name" || col === "city"; }
     document.querySelectorAll("th.sortable").forEach(th => {
-        const arrow = th.dataset.sort === sortCol ? (sortAsc ? " \u25b4" : " \u25be") : " \u25bf";
-        th.textContent = th.textContent.replace(/ [\u25b4\u25be\u25bf]$/, "") + arrow;
+        const arrow = th.dataset.sort === sortCol ? (sortAsc ? " \u25B4" : " \u25BE") : " \u25BF";
+        th.textContent = th.textContent.replace(/ [\u25B4\u25BE\u25BF]$/, "") + arrow;
     });
     renderTable();
 }
@@ -304,7 +286,6 @@ document.getElementById("city-filter").addEventListener("change", () => { render
 document.getElementById("type-filter").addEventListener("change", () => { renderTable(); renderActiveView(); });
 document.getElementById("deletions-only").addEventListener("change", () => { renderTable(); renderActiveView(); });
 
-// -- Views --
 function switchView(view) {
     document.querySelectorAll(".view-panel").forEach(p => p.classList.remove("active"));
     document.querySelectorAll(".view-tab").forEach(t => t.classList.remove("active"));
@@ -319,7 +300,6 @@ function renderActiveView() {
     if (active.id === "view-map") renderMap();
 }
 
-// -- Charts --
 const BAR_PAGE_SIZE = 10;
 
 function renderCharts() {
@@ -363,9 +343,9 @@ function renderBarChart(venues) {
 
     const pagDiv = document.getElementById("bar-pagination");
     pagDiv.innerHTML = sorted.length > BAR_PAGE_SIZE
-        ? `<button class="pag-btn" onclick="barPrev()" ${barPage === 0 ? 'disabled' : ''}>\u25c0 Prev</button>
+        ? `<button class="pag-btn" onclick="barPrev()" ${barPage === 0 ? 'disabled' : ''}>\u25C0 Prev</button>
            <span class="pag-info">Page ${barPage + 1} of ${totalPages}</span>
-           <button class="pag-btn" onclick="barNext()" ${barPage >= totalPages - 1 ? 'disabled' : ''}> Next \u25b6</button>`
+           <button class="pag-btn" onclick="barNext()" ${barPage >= totalPages - 1 ? 'disabled' : ''}> Next \u25B6</button>`
         : '';
 }
 
@@ -391,7 +371,7 @@ function renderGapChart(venues) {
             indexAxis: "y",
             maintainAspectRatio: false,
             plugins: {
-                tooltip: { callbacks: { label: ctx => ctx.datasetIndex === 0 ? `Real: ${ctx.raw.toFixed(2)}\u2b50` : `Inflated: +${ctx.raw.toFixed(2)}` } },
+                tooltip: { callbacks: { label: ctx => ctx.datasetIndex === 0 ? `Real: ${ctx.raw.toFixed(2)}\u2B50` : `Inflated: +${ctx.raw.toFixed(2)}` } },
                 legend: { position: "top", labels: { boxWidth: 12, padding: 16 } }
             },
             scales: {
@@ -402,7 +382,6 @@ function renderGapChart(venues) {
     });
 }
 
-// -- Map --
 function renderMap() {
     const venues = getFiltered().filter(v => v.has_deletions);
     if (!leafletMap) {
@@ -428,9 +407,9 @@ function renderMap() {
         });
         marker.bindPopup(`
             <strong>${esc(v.name)}</strong><br>
-            ${esc(v.venue_type)} \u00b7 ${esc(v.city)}<br>
-            \u2b50 ${v.current_rating} \u2192 ${v.real_score.toFixed(1)} (gap: ${v.rating_gap.toFixed(2)})<br>
-            \U0001f5d1\ufe0f ~${Math.round(v.deleted_estimate)} deleted (${v.percentage_deleted.toFixed(1)}%)<br>
+            ${esc(v.venue_type)} \u00B7 ${esc(v.city)}<br>
+            \u2B50 ${v.current_rating} \u2192 ${v.real_score.toFixed(1)} (gap: ${v.rating_gap.toFixed(2)})<br>
+            \uD83D\uDDD1\uFE0F ~${Math.round(v.deleted_estimate)} deleted (${v.percentage_deleted.toFixed(1)}%)<br>
             <a href="${v.url}" target="_blank">Open in Google Maps</a>
         `);
         markerLayer.addLayer(marker);
@@ -443,24 +422,16 @@ function renderMap() {
 }
 
 function extractCoords(url) {
-    const latMatch = url.match(/!3d(-?\\d+\\.\\d+)/);
-    const lngMatch = url.match(/!4d(-?\\d+\\.\\d+)/);
+    const latMatch = url.match(/!3d(-?\d+\.\d+)/);
+    const lngMatch = url.match(/!4d(-?\d+\.\d+)/);
     if (latMatch && lngMatch) return [parseFloat(latMatch[1]), parseFloat(lngMatch[1])];
     return null;
 }
 
-init();
+// Initial render count
+document.getElementById("result-count").textContent = `Showing ${allVenues.filter(v => v.has_deletions).length} venues`;
 </script>
+@endraw
+
 </body>
-</html>"""
-
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Build static site")
-    parser.add_argument(
-        "--data-dir",
-        default=str(Path(__file__).parent.parent / "maps-deleted-reviews" / "output"),
-        help="Path to CSV/JSON output directory",
-    )
-    args = parser.parse_args()
-    build(Path(args.data_dir))
+</html>
