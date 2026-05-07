@@ -121,7 +121,7 @@ def register(app: FastAPI, nav, config: dict) -> None:
     mount = config.get("mount", "/reviews")
     data_dir = Path(config.get("data_dir", str(plugin_dir / ".." / "maps-deleted-reviews" / "output")))
 
-    nav.add(label="Deleted Reviews", icon="🗑️", href=mount, order=30)
+    nav.add(label="Deleted Reviews", icon="\U0001f5d1\ufe0f", href=mount, order=30)
 
     @app.get(mount, response_class=HTMLResponse)
     async def reviews_page():
@@ -139,7 +139,7 @@ def register(app: FastAPI, nav, config: dict) -> None:
 def _build_body(mount: str) -> str:
     return f"""
 <div class="header">
-    <h1>🗑️ Deleted Reviews Dashboard</h1>
+    <h1>\U0001f5d1\ufe0f Deleted Reviews Dashboard</h1>
     <p>Google Maps venues with reviews removed due to defamation complaints</p>
     <div class="stats-bar" id="stats-bar"></div>
 </div>
@@ -153,9 +153,9 @@ def _build_body(mount: str) -> str:
         Only with deletions
     </label>
     <div class="view-tabs">
-        <button class="view-tab active" data-view="table" onclick="switchView('table')">📋 Table</button>
-        <button class="view-tab" data-view="charts" onclick="switchView('charts')">📊 Charts</button>
-        <button class="view-tab" data-view="map" onclick="switchView('map')">🗺️ Map</button>
+        <button class="view-tab active" data-view="table" onclick="switchView('table')">\U0001f4cb Table</button>
+        <button class="view-tab" data-view="charts" onclick="switchView('charts')">\U0001f4ca Charts</button>
+        <button class="view-tab" data-view="map" onclick="switchView('map')">\U0001f5fa\ufe0f Map</button>
     </div>
 </div>
 
@@ -165,15 +165,15 @@ def _build_body(mount: str) -> str:
         <table id="venues-table">
             <thead>
                 <tr>
-                    <th data-sort="name" class="sortable">Venue ▿</th>
-                    <th data-sort="city" class="sortable">City ▿</th>
-                    <th data-sort="venue_type" class="sortable">Type ▿</th>
-                    <th data-sort="total_reviews" class="sortable num">Reviews ▿</th>
-                    <th data-sort="deleted_estimate" class="sortable num">Deleted ▿</th>
-                    <th data-sort="percentage_deleted" class="sortable num">% Del ▿</th>
-                    <th data-sort="current_rating" class="sortable num">Rating ▿</th>
-                    <th data-sort="real_score" class="sortable num">Real ▿</th>
-                    <th data-sort="rating_gap" class="sortable num">Gap ▿</th>
+                    <th data-sort="name" class="sortable">Venue \u25bf</th>
+                    <th data-sort="city" class="sortable">City \u25bf</th>
+                    <th data-sort="venue_type" class="sortable">Type \u25bf</th>
+                    <th data-sort="total_reviews" class="sortable num">Reviews \u25bf</th>
+                    <th data-sort="deleted_estimate" class="sortable num">Deleted \u25bf</th>
+                    <th data-sort="percentage_deleted" class="sortable num">% Del \u25bf</th>
+                    <th data-sort="current_rating" class="sortable num">Rating \u25bf</th>
+                    <th data-sort="real_score" class="sortable num">Real \u25bf</th>
+                    <th data-sort="rating_gap" class="sortable num">Gap \u25bf</th>
                 </tr>
             </thead>
             <tbody id="venues-tbody"></tbody>
@@ -230,11 +230,11 @@ async function init() {{
 
 function renderStats() {{
     document.getElementById("stats-bar").innerHTML = `
-        <span class="stat-pill">📍 ${{stats.total_venues}} Venues</span>
-        <span class="stat-pill warn">⚠️ ${{stats.venues_with_deletions}} With Deletions</span>
-        <span class="stat-pill danger">🗑️ ${{stats.total_deleted_reviews}} Deleted Reviews</span>
-        <span class="stat-pill">📉 ${{stats.avg_rating_gap}} Avg Gap</span>
-        <span class="stat-pill dim">🕐 ${{stats.latest_scrape ? new Date(stats.latest_scrape).toLocaleDateString() : "—"}}</span>`;
+        <span class="stat-pill">\U0001f4cd ${{stats.total_venues}} Venues</span>
+        <span class="stat-pill warn">\u26a0\ufe0f ${{stats.venues_with_deletions}} With Deletions</span>
+        <span class="stat-pill danger">\U0001f5d1\ufe0f ${{stats.total_deleted_reviews}} Deleted Reviews</span>
+        <span class="stat-pill">\U0001f4c9 ${{stats.avg_rating_gap}} Avg Gap</span>
+        <span class="stat-pill dim">\U0001f550 ${{stats.latest_scrape ? new Date(stats.latest_scrape).toLocaleDateString() : "\u2014"}}</span>`;
 }}
 
 function populateFilters() {{
@@ -277,9 +277,9 @@ function severityClass(pct) {{
 }}
 
 function severityBadge(pct) {{
-    if (pct >= 10) return '<span class="sev-badge high">🔴 High</span>';
-    if (pct >= 5) return '<span class="sev-badge med">🟡 Med</span>';
-    if (pct > 0) return '<span class="sev-badge low">🟢 Low</span>';
+    if (pct >= 10) return '<span class="sev-badge high">\U0001f534 High</span>';
+    if (pct >= 5) return '<span class="sev-badge med">\U0001f7e1 Med</span>';
+    if (pct > 0) return '<span class="sev-badge low">\U0001f7e2 Low</span>';
     return "";
 }}
 
@@ -297,11 +297,11 @@ function renderTable() {{
             <td>${{esc(v.city)}}</td>
             <td>${{esc(v.venue_type)}}</td>
             <td class="num">${{v.total_reviews.toLocaleString()}}</td>
-            <td class="num">${{v.deleted_estimate > 0 ? "~" + Math.round(v.deleted_estimate) : "—"}}</td>
-            <td class="num">${{v.percentage_deleted > 0 ? v.percentage_deleted.toFixed(1) + "%" : "—"}} ${{severityBadge(v.percentage_deleted)}}</td>
-            <td class="num">⭐ ${{v.current_rating || "—"}}</td>
-            <td class="num">${{v.real_score ? "⭐ " + v.real_score.toFixed(1) : "—"}}</td>
-            <td class="num">${{v.rating_gap > 0 ? "-" + v.rating_gap.toFixed(2) : "—"}}</td>
+            <td class="num">${{v.deleted_estimate > 0 ? "~" + Math.round(v.deleted_estimate) : "\u2014"}}</td>
+            <td class="num">${{v.percentage_deleted > 0 ? v.percentage_deleted.toFixed(1) + "%" : "\u2014"}} ${{severityBadge(v.percentage_deleted)}}</td>
+            <td class="num">\u2b50 ${{v.current_rating || "\u2014"}}</td>
+            <td class="num">${{v.real_score ? "\u2b50 " + v.real_score.toFixed(1) : "\u2014"}}</td>
+            <td class="num">${{v.rating_gap > 0 ? "-" + v.rating_gap.toFixed(2) : "\u2014"}}</td>
         </tr>`;
     }}).join("");
 }}
@@ -309,8 +309,8 @@ function renderTable() {{
 function handleSort(col) {{
     if (sortCol === col) {{ sortAsc = !sortAsc; }} else {{ sortCol = col; sortAsc = col === "name" || col === "city"; }}
     document.querySelectorAll("th.sortable").forEach(th => {{
-        const arrow = th.dataset.sort === sortCol ? (sortAsc ? " ▴" : " ▾") : " ▿";
-        th.textContent = th.textContent.replace(/ [▴▾▿]$/, "") + arrow;
+        const arrow = th.dataset.sort === sortCol ? (sortAsc ? " \u25b4" : " \u25be") : " \u25bf";
+        th.textContent = th.textContent.replace(/ [\u25b4\u25be\u25bf]$/, "") + arrow;
     }});
     renderTable();
 }}
@@ -321,7 +321,7 @@ document.getElementById("city-filter").addEventListener("change", () => {{ rende
 document.getElementById("type-filter").addEventListener("change", () => {{ renderTable(); renderActiveView(); }});
 document.getElementById("deletions-only").addEventListener("change", () => {{ renderTable(); renderActiveView(); }});
 
-// ── Views ──
+// -- Views --
 function switchView(view) {{
     document.querySelectorAll(".view-panel").forEach(p => p.classList.remove("active"));
     document.querySelectorAll(".view-tab").forEach(t => t.classList.remove("active"));
@@ -336,7 +336,7 @@ function renderActiveView() {{
     if (active.id === "view-map") renderMap();
 }}
 
-// ── Charts ──
+// -- Charts --
 function renderCharts() {{
     const venues = getFiltered().filter(v => v.has_deletions);
     renderBarChart(venues);
@@ -385,7 +385,7 @@ function renderScatterChart(venues) {{
         options: {{
             plugins: {{
                 legend: {{ display: false }},
-                tooltip: {{ callbacks: {{ label: ctx => `${{ctx.raw.label}}: ${{ctx.raw.x}}⭐ → ${{ctx.raw.y.toFixed(1)}}⭐ (~${{Math.round(ctx.raw.deleted)}} deleted)` }} }}
+                tooltip: {{ callbacks: {{ label: ctx => `${{ctx.raw.label}}: ${{ctx.raw.x}}\u2b50 \u2192 ${{ctx.raw.y.toFixed(1)}}\u2b50 (~${{Math.round(ctx.raw.deleted)}} deleted)` }} }}
             }},
             scales: {{
                 x: {{ title: {{ display: true, text: "Current Rating" }}, min: 3.5, max: 5.1 }},
@@ -414,7 +414,7 @@ function renderScatterChart(venues) {{
 function renderBreakdownChart(venues) {{
     const groups = {{}};
     venues.forEach(v => {{
-        const key = `${{v.city}} — ${{v.venue_type || "other"}}`;
+        const key = `${{v.city}} \u2014 ${{v.venue_type || "other"}}`;
         groups[key] = (groups[key] || 0) + v.deleted_estimate;
     }});
     const sorted = Object.entries(groups).sort((a, b) => b[1] - a[1]);
@@ -435,7 +435,7 @@ function renderBreakdownChart(venues) {{
     }});
 }}
 
-// ── Map ──
+// -- Map --
 const CITY_COORDS = {{
     "Stuttgart": [48.7758, 9.1829],
     "Stuttgart West": [48.7730, 9.1600],
@@ -469,9 +469,9 @@ function renderMap() {{
         }});
         marker.bindPopup(`
             <strong>${{esc(v.name)}}</strong><br>
-            ${{esc(v.venue_type)}} · ${{esc(v.city)}}<br>
-            ⭐ ${{v.current_rating}} → ${{v.real_score.toFixed(1)}} (gap: ${{v.rating_gap.toFixed(2)}})<br>
-            🗑️ ~${{Math.round(v.deleted_estimate)}} deleted (${{v.percentage_deleted.toFixed(1)}}%)<br>
+            ${{esc(v.venue_type)}} \u00b7 ${{esc(v.city)}}<br>
+            \u2b50 ${{v.current_rating}} \u2192 ${{v.real_score.toFixed(1)}} (gap: ${{v.rating_gap.toFixed(2)}})<br>
+            \U0001f5d1\ufe0f ~${{Math.round(v.deleted_estimate)}} deleted (${{v.percentage_deleted.toFixed(1)}}%)<br>
             <a href="${{v.url}}" target="_blank">Open in Google Maps</a>
         `);
         markerLayer.addLayer(marker);
