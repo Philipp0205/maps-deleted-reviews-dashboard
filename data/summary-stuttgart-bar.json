@@ -1,0 +1,20 @@
+{
+  "city": "Stuttgart",
+  "country": "Germany",
+  "searchTerm": "bar",
+  "depth": 500,
+  "outputCsvPath": "output/deleted-reviews-stuttgart-bar.csv",
+  "statePath": "output/state-stuttgart-bar.json",
+  "summaryPath": "output/summary-stuttgart-bar.json",
+  "discoveredVenues": 0,
+  "completedVenues": 0,
+  "failedVenues": 0,
+  "csvRows": 0,
+  "okRows": 0,
+  "partialRows": 0,
+  "failedRows": 0,
+  "deletionNoticesFound": 0,
+  "startedAt": "2026-05-07T23:37:11.893Z",
+  "finishedAt": "2026-05-07T23:37:28.079Z",
+  "durationMs": 16186
+}

@@ -1,0 +1,20 @@
+{
+  "city": "Stuttgart",
+  "country": "Germany",
+  "searchTerm": "restaurant",
+  "depth": 500,
+  "outputCsvPath": "output/deleted-reviews-stuttgart-restaurant.csv",
+  "statePath": "output/state-stuttgart-restaurant.json",
+  "summaryPath": "output/summary-stuttgart-restaurant.json",
+  "discoveredVenues": 110,
+  "completedVenues": 110,
+  "failedVenues": 0,
+  "csvRows": 110,
+  "okRows": 110,
+  "partialRows": 0,
+  "failedRows": 0,
+  "deletionNoticesFound": 32,
+  "startedAt": "2026-05-07T21:27:17.341Z",
+  "finishedAt": "2026-05-07T23:30:53.120Z",
+  "durationMs": 7415779
+}

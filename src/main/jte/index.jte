@@ -83,6 +83,46 @@ td a:hover { text-decoration: underline; }
 @media (max-width: 768px) {
     .controls { flex-direction: column; }
     .view-tabs { margin-left: 0; }
+    /* hide less critical columns on tablet */
+    .col-city, .col-type, .col-real, .col-gap { display: none; }
+}
+
+@media (max-width: 480px) {
+    /* card layout: hide the real table, show cards */
+    #venues-table thead { display: none; }
+    #venues-table, #venues-table tbody { display: block; }
+    #venues-table tr {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2px 8px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        margin-bottom: 0.6rem;
+        padding: 0.6rem 0.75rem;
+    }
+    #venues-table tr.severity-high { background: #fef2f2; }
+    #venues-table tr.severity-med  { background: #fffbeb; }
+    #venues-table td {
+        display: flex;
+        flex-direction: column;
+        padding: 2px 0;
+        border: none;
+        font-size: 0.8rem;
+    }
+    #venues-table td::before {
+        content: attr(data-label);
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        color: #999;
+        font-weight: 600;
+        margin-bottom: 1px;
+    }
+    /* venue name spans full width */
+    #venues-table td.col-name { grid-column: 1 / -1; font-size: 0.9rem; }
+    /* hide city/type/real/gap on mobile too */
+    .col-city, .col-type, .col-real, .col-gap { display: none; }
+    td.num { text-align: left; }
 }
 </style>
 </head>
@@ -132,15 +172,15 @@ td a:hover { text-decoration: underline; }
         <table id="venues-table">
             <thead>
                 <tr>
-                    <th data-sort="name" class="sortable">Venue &#9663;</th>
-                    <th data-sort="city" class="sortable">City &#9663;</th>
-                    <th data-sort="venue_type" class="sortable">Type &#9663;</th>
-                    <th data-sort="total_reviews" class="sortable num">Reviews &#9663;</th>
-                    <th data-sort="deleted_estimate" class="sortable num">Deleted &#9663;</th>
-                    <th data-sort="percentage_deleted" class="sortable num">% Del &#9663;</th>
-                    <th data-sort="current_rating" class="sortable num">Rating &#9663;</th>
-                    <th data-sort="real_score" class="sortable num">Real &#9663;</th>
-                    <th data-sort="rating_gap" class="sortable num">Gap &#9663;</th>
+                    <th data-sort="name" class="sortable col-name">Venue &#9663;</th>
+                    <th data-sort="city" class="sortable col-city">City &#9663;</th>
+                    <th data-sort="venue_type" class="sortable col-type">Type &#9663;</th>
+                    <th data-sort="total_reviews" class="sortable num col-reviews">Reviews &#9663;</th>
+                    <th data-sort="deleted_estimate" class="sortable num col-deleted">Deleted &#9663;</th>
+                    <th data-sort="percentage_deleted" class="sortable num col-pct">% Del &#9663;</th>
+                    <th data-sort="current_rating" class="sortable num col-rating">Rating &#9663;</th>
+                    <th data-sort="real_score" class="sortable num col-real">Real &#9663;</th>
+                    <th data-sort="rating_gap" class="sortable num col-gap">Gap &#9663;</th>
                 </tr>
             </thead>
             <tbody id="venues-tbody">
@@ -149,15 +189,15 @@ td a:hover { text-decoration: underline; }
                     @if(v.hasDeletions())
                         <tr class="${v.severityClass()}">
                             !{var titleAttr = v.reviewNotice().isEmpty() ? "" : " title=\"" + v.reviewNotice() + "\"";}
-                            <td><a href="${v.url()}" target="_blank"${titleAttr}>${v.name()}</a></td>
-                            <td>${v.city()}</td>
-                            <td>${v.venueType()}</td>
-                            <td class="num">${v.totalReviews()}</td>
-                            <td class="num">${v.deletedDisplay()}</td>
-                            <td class="num">${v.percentageDisplay()} ${v.severityBadge()}</td>
-                            <td class="num">${v.ratingDisplay()}</td>
-                            <td class="num">${v.realScoreDisplay()}</td>
-                            <td class="num">${v.gapDisplay()}</td>
+                            <td class="col-name"><a href="${v.url()}" target="_blank"${titleAttr}>${v.name()}</a></td>
+                            <td class="col-city" data-label="City">${v.city()}</td>
+                            <td class="col-type" data-label="Type">${v.venueType()}</td>
+                            <td class="num col-reviews" data-label="Reviews">${v.totalReviews()}</td>
+                            <td class="num col-deleted" data-label="Deleted">${v.deletedDisplay()}</td>
+                            <td class="num col-pct" data-label="% Deleted">${v.percentageDisplay()} ${v.severityBadge()}</td>
+                            <td class="num col-rating" data-label="Rating">${v.ratingDisplay()}</td>
+                            <td class="num col-real" data-label="Real">${v.realScoreDisplay()}</td>
+                            <td class="num col-gap" data-label="Gap">${v.gapDisplay()}</td>
                         </tr>
                     @endif
                 @endfor
@@ -258,15 +298,15 @@ function renderTable() {
         const cls = severityClass(v.percentage_deleted);
         const notice = v.review_notice ? ` title="${esc(v.review_notice)}"` : "";
         return `<tr class="${cls}">
-            <td><a href="${v.url}" target="_blank"${notice}>${esc(v.name)}</a></td>
-            <td>${esc(v.city)}</td>
-            <td>${esc(v.venue_type)}</td>
-            <td class="num">${v.total_reviews.toLocaleString()}</td>
-            <td class="num">${v.deleted_estimate > 0 ? "~" + Math.round(v.deleted_estimate) : "\u2014"}</td>
-            <td class="num">${v.percentage_deleted > 0 ? v.percentage_deleted.toFixed(1) + "%" : "\u2014"} ${severityBadge(v.percentage_deleted)}</td>
-            <td class="num">\u2B50 ${v.current_rating || "\u2014"}</td>
-            <td class="num">${v.real_score ? "\u2B50 " + v.real_score.toFixed(1) : "\u2014"}</td>
-            <td class="num">${v.rating_gap > 0 ? "-" + v.rating_gap.toFixed(2) : "\u2014"}</td>
+            <td class="col-name"><a href="${v.url}" target="_blank"${notice}>${esc(v.name)}</a></td>
+            <td class="col-city" data-label="City">${esc(v.city)}</td>
+            <td class="col-type" data-label="Type">${esc(v.venue_type)}</td>
+            <td class="num col-reviews" data-label="Reviews">${v.total_reviews.toLocaleString()}</td>
+            <td class="num col-deleted" data-label="Deleted">${v.deleted_estimate > 0 ? "~" + Math.round(v.deleted_estimate) : "\u2014"}</td>
+            <td class="num col-pct" data-label="% Deleted">${v.percentage_deleted > 0 ? v.percentage_deleted.toFixed(1) + "%" : "\u2014"} ${severityBadge(v.percentage_deleted)}</td>
+            <td class="num col-rating" data-label="Rating">\u2B50 ${v.current_rating || "\u2014"}</td>
+            <td class="num col-real" data-label="Real">${v.real_score ? "\u2B50 " + v.real_score.toFixed(1) : "\u2014"}</td>
+            <td class="num col-gap" data-label="Gap">${v.rating_gap > 0 ? "-" + v.rating_gap.toFixed(2) : "\u2014"}</td>
         </tr>`;
     }).join("");
 }

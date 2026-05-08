@@ -76,6 +76,46 @@ td a:hover { text-decoration: underline; }
 @media (max-width: 768px) {
     .controls { flex-direction: column; }
     .view-tabs { margin-left: 0; }
+    /* hide less critical columns on tablet */
+    .col-city, .col-type, .col-real, .col-gap { display: none; }
+}
+
+@media (max-width: 480px) {
+    /* card layout: hide the real table, show cards */
+    #venues-table thead { display: none; }
+    #venues-table, #venues-table tbody { display: block; }
+    #venues-table tr {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2px 8px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        margin-bottom: 0.6rem;
+        padding: 0.6rem 0.75rem;
+    }
+    #venues-table tr.severity-high { background: #fef2f2; }
+    #venues-table tr.severity-med  { background: #fffbeb; }
+    #venues-table td {
+        display: flex;
+        flex-direction: column;
+        padding: 2px 0;
+        border: none;
+        font-size: 0.8rem;
+    }
+    #venues-table td::before {
+        content: attr(data-label);
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        color: #999;
+        font-weight: 600;
+        margin-bottom: 1px;
+    }
+    /* venue name spans full width */
+    #venues-table td.col-name { grid-column: 1 / -1; font-size: 0.9rem; }
+    /* hide city/type/real/gap on mobile too */
+    .col-city, .col-type, .col-real, .col-gap { display: none; }
+    td.num { text-align: left; }
 }
 </style>
 </head>
@@ -128,15 +168,15 @@ td a:hover { text-decoration: underline; }
         <table id="venues-table">
             <thead>
                 <tr>
-                    <th data-sort="name" class="sortable">Venue &#9663;</th>
-                    <th data-sort="city" class="sortable">City &#9663;</th>
-                    <th data-sort="venue_type" class="sortable">Type &#9663;</th>
-                    <th data-sort="total_reviews" class="sortable num">Reviews &#9663;</th>
-                    <th data-sort="deleted_estimate" class="sortable num">Deleted &#9663;</th>
-                    <th data-sort="percentage_deleted" class="sortable num">% Del &#9663;</th>
-                    <th data-sort="current_rating" class="sortable num">Rating &#9663;</th>
-                    <th data-sort="real_score" class="sortable num">Real &#9663;</th>
-                    <th data-sort="rating_gap" class="sortable num">Gap &#9663;</th>
+                    <th data-sort="name" class="sortable col-name">Venue &#9663;</th>
+                    <th data-sort="city" class="sortable col-city">City &#9663;</th>
+                    <th data-sort="venue_type" class="sortable col-type">Type &#9663;</th>
+                    <th data-sort="total_reviews" class="sortable num col-reviews">Reviews &#9663;</th>
+                    <th data-sort="deleted_estimate" class="sortable num col-deleted">Deleted &#9663;</th>
+                    <th data-sort="percentage_deleted" class="sortable num col-pct">% Del &#9663;</th>
+                    <th data-sort="current_rating" class="sortable num col-rating">Rating &#9663;</th>
+                    <th data-sort="real_score" class="sortable num col-real">Real &#9663;</th>
+                    <th data-sort="rating_gap" class="sortable num col-gap">Gap &#9663;</th>
                 </tr>
             </thead>
             <tbody id="venues-tbody">
@@ -145,142 +185,142 @@ td a:hover { text-decoration: underline; }
                     
                         <tr class="severity-high">
                             
-                            <td><a href="https://www.google.de/maps/place/Tibi+Bistro+Bar/data=!4m7!3m6!1s0x4799c4b4b2d99415:0xc516692b760a9c73!8m2!3d48.7722926!4d9.1811078!16s%2Fg%2F11n36mg__4!19sChIJFZTZsrTEmUcRc5wKditpFsU?authuser=0&hl=de&rclk=1" target="_blank" title="Sechs bis zehn Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">Tibi Bistro Bar</a></td>
-                            <td>Stuttgart</td>
-                            <td>Café</td>
-                            <td class="num">29</td>
-                            <td class="num">~8</td>
-                            <td class="num">21.6% <span class="sev-badge high">🔴 High</span></td>
-                            <td class="num">⭐ 4.8</td>
-                            <td class="num">⭐ 4.0</td>
-                            <td class="num">-0.82</td>
+                            <td class="col-name"><a href="https://www.google.de/maps/place/Tibi+Bistro+Bar/data=!4m7!3m6!1s0x4799c4b4b2d99415:0xc516692b760a9c73!8m2!3d48.7722926!4d9.1811078!16s%2Fg%2F11n36mg__4!19sChIJFZTZsrTEmUcRc5wKditpFsU?authuser=0&hl=de&rclk=1" target="_blank" title="Sechs bis zehn Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">Tibi Bistro Bar</a></td>
+                            <td class="col-city" data-label="City">Stuttgart</td>
+                            <td class="col-type" data-label="Type">Café</td>
+                            <td class="num col-reviews" data-label="Reviews">29</td>
+                            <td class="num col-deleted" data-label="Deleted">~8</td>
+                            <td class="num col-pct" data-label="% Deleted">21.6% <span class="sev-badge high">🔴 High</span></td>
+                            <td class="num col-rating" data-label="Rating">⭐ 4.8</td>
+                            <td class="num col-real" data-label="Real">⭐ 4.0</td>
+                            <td class="num col-gap" data-label="Gap">-0.82</td>
                         </tr>
                     
                 
                     
                         <tr class="severity-high">
                             
-                            <td><a href="https://www.google.de/maps/place/OSCHO/data=!4m7!3m6!1s0x4799db88bab8c43d:0x1937cfa631ade461!8m2!3d48.7754208!4d9.1760629!16s%2Fg%2F11y3xk0llh!19sChIJPcS4uojbmUcRYeStMabPNxk?authuser=0&hl=de&rclk=1" target="_blank" title="21 bis 50 Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">OSCHO</a></td>
-                            <td>Stuttgart</td>
-                            <td>Café</td>
-                            <td class="num">149</td>
-                            <td class="num">~36</td>
-                            <td class="num">19.2% <span class="sev-badge high">🔴 High</span></td>
-                            <td class="num">⭐ 4.7</td>
-                            <td class="num">⭐ 4.0</td>
-                            <td class="num">-0.71</td>
+                            <td class="col-name"><a href="https://www.google.de/maps/place/OSCHO/data=!4m7!3m6!1s0x4799db88bab8c43d:0x1937cfa631ade461!8m2!3d48.7754208!4d9.1760629!16s%2Fg%2F11y3xk0llh!19sChIJPcS4uojbmUcRYeStMabPNxk?authuser=0&hl=de&rclk=1" target="_blank" title="21 bis 50 Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">OSCHO</a></td>
+                            <td class="col-city" data-label="City">Stuttgart</td>
+                            <td class="col-type" data-label="Type">Café</td>
+                            <td class="num col-reviews" data-label="Reviews">149</td>
+                            <td class="num col-deleted" data-label="Deleted">~36</td>
+                            <td class="num col-pct" data-label="% Deleted">19.2% <span class="sev-badge high">🔴 High</span></td>
+                            <td class="num col-rating" data-label="Rating">⭐ 4.7</td>
+                            <td class="num col-real" data-label="Real">⭐ 4.0</td>
+                            <td class="num col-gap" data-label="Gap">-0.71</td>
                         </tr>
                     
                 
                     
                         <tr class="severity-high">
                             
-                            <td><a href="https://www.google.de/maps/place/Zimt+%26+Zucker/data=!4m7!3m6!1s0x4799db4db0bb0acd:0x59ac91ff3eefec5b!8m2!3d48.7688484!4d9.1753483!16s%2Fg%2F1tgj7srk!19sChIJzQq7sE3bmUcRW-zvPv-RrFk?authuser=0&hl=de&rclk=1" target="_blank" title="250 Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">Zimt & Zucker</a></td>
-                            <td>Stuttgart</td>
-                            <td>Café</td>
-                            <td class="num">1116</td>
-                            <td class="num">~250</td>
-                            <td class="num">18.3% <span class="sev-badge high">🔴 High</span></td>
-                            <td class="num">⭐ 4.5</td>
-                            <td class="num">⭐ 3.9</td>
-                            <td class="num">-0.64</td>
+                            <td class="col-name"><a href="https://www.google.de/maps/place/Zimt+%26+Zucker/data=!4m7!3m6!1s0x4799db4db0bb0acd:0x59ac91ff3eefec5b!8m2!3d48.7688484!4d9.1753483!16s%2Fg%2F1tgj7srk!19sChIJzQq7sE3bmUcRW-zvPv-RrFk?authuser=0&hl=de&rclk=1" target="_blank" title="250 Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">Zimt & Zucker</a></td>
+                            <td class="col-city" data-label="City">Stuttgart</td>
+                            <td class="col-type" data-label="Type">Café</td>
+                            <td class="num col-reviews" data-label="Reviews">1116</td>
+                            <td class="num col-deleted" data-label="Deleted">~250</td>
+                            <td class="num col-pct" data-label="% Deleted">18.3% <span class="sev-badge high">🔴 High</span></td>
+                            <td class="num col-rating" data-label="Rating">⭐ 4.5</td>
+                            <td class="num col-real" data-label="Real">⭐ 3.9</td>
+                            <td class="num col-gap" data-label="Gap">-0.64</td>
                         </tr>
                     
                 
                     
                         <tr class="severity-med">
                             
-                            <td><a href="https://www.google.de/maps/place/Mocca+Espresso+%26+Weinbar/data=!4m7!3m6!1s0x4799db4eab454c45:0x9d77655b813b002!8m2!3d48.7719064!4d9.1741124!16s%2Fg%2F1tdvck0k!19sChIJRUxFq07bmUcRArATuFV21wk?authuser=0&hl=de&rclk=1" target="_blank" title="21 bis 50 Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">Mocca Espresso & Weinbar</a></td>
-                            <td>Stuttgart</td>
-                            <td>Café</td>
-                            <td class="num">328</td>
-                            <td class="num">~36</td>
-                            <td class="num">9.8% <span class="sev-badge med">🟡 Med</span></td>
-                            <td class="num">⭐ 4.7</td>
-                            <td class="num">⭐ 4.3</td>
-                            <td class="num">-0.36</td>
+                            <td class="col-name"><a href="https://www.google.de/maps/place/Mocca+Espresso+%26+Weinbar/data=!4m7!3m6!1s0x4799db4eab454c45:0x9d77655b813b002!8m2!3d48.7719064!4d9.1741124!16s%2Fg%2F1tdvck0k!19sChIJRUxFq07bmUcRArATuFV21wk?authuser=0&hl=de&rclk=1" target="_blank" title="21 bis 50 Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">Mocca Espresso & Weinbar</a></td>
+                            <td class="col-city" data-label="City">Stuttgart</td>
+                            <td class="col-type" data-label="Type">Café</td>
+                            <td class="num col-reviews" data-label="Reviews">328</td>
+                            <td class="num col-deleted" data-label="Deleted">~36</td>
+                            <td class="num col-pct" data-label="% Deleted">9.8% <span class="sev-badge med">🟡 Med</span></td>
+                            <td class="num col-rating" data-label="Rating">⭐ 4.7</td>
+                            <td class="num col-real" data-label="Real">⭐ 4.3</td>
+                            <td class="num col-gap" data-label="Gap">-0.36</td>
                         </tr>
                     
                 
                     
                         <tr class="severity-med">
                             
-                            <td><a href="https://www.google.de/maps/place/huginn+caf%C3%A9+%26+bar/data=!4m7!3m6!1s0x4799dbbaaaea7899:0x35781fe101182be1!8m2!3d48.7757933!4d9.1735241!16s%2Fg%2F11jdnl2txj!19sChIJmXjqqrrbmUcR4SsYAeEfeDU?authuser=0&hl=de&rclk=1" target="_blank" title="21 bis 50 Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">huginn café & bar</a></td>
-                            <td>Stuttgart</td>
-                            <td>Café</td>
-                            <td class="num">349</td>
-                            <td class="num">~36</td>
-                            <td class="num">9.2% <span class="sev-badge med">🟡 Med</span></td>
-                            <td class="num">⭐ 4.8</td>
-                            <td class="num">⭐ 4.4</td>
-                            <td class="num">-0.35</td>
+                            <td class="col-name"><a href="https://www.google.de/maps/place/huginn+caf%C3%A9+%26+bar/data=!4m7!3m6!1s0x4799dbbaaaea7899:0x35781fe101182be1!8m2!3d48.7757933!4d9.1735241!16s%2Fg%2F11jdnl2txj!19sChIJmXjqqrrbmUcR4SsYAeEfeDU?authuser=0&hl=de&rclk=1" target="_blank" title="21 bis 50 Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">huginn café & bar</a></td>
+                            <td class="col-city" data-label="City">Stuttgart</td>
+                            <td class="col-type" data-label="Type">Café</td>
+                            <td class="num col-reviews" data-label="Reviews">349</td>
+                            <td class="num col-deleted" data-label="Deleted">~36</td>
+                            <td class="num col-pct" data-label="% Deleted">9.2% <span class="sev-badge med">🟡 Med</span></td>
+                            <td class="num col-rating" data-label="Rating">⭐ 4.8</td>
+                            <td class="num col-real" data-label="Real">⭐ 4.4</td>
+                            <td class="num col-gap" data-label="Gap">-0.35</td>
                         </tr>
                     
                 
                     
                         <tr class="severity-med">
                             
-                            <td><a href="https://www.google.de/maps/place/Cafe+Hegel/data=!4m7!3m6!1s0x4799db2316cd3c4f:0xdf2d40a03f073bbf!8m2!3d48.7731875!4d9.1779949!16s%2Fg%2F11tfzb_1xq!19sChIJTzzNFiPbmUcRvzsHP6BALd8?authuser=0&hl=de&rclk=1" target="_blank" title="51 bis 100 Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">Cafe Hegel</a></td>
-                            <td>Stuttgart</td>
-                            <td>Café</td>
-                            <td class="num">798</td>
-                            <td class="num">~76</td>
-                            <td class="num">8.6% <span class="sev-badge med">🟡 Med</span></td>
-                            <td class="num">⭐ 5.0</td>
-                            <td class="num">⭐ 4.7</td>
-                            <td class="num">-0.35</td>
+                            <td class="col-name"><a href="https://www.google.de/maps/place/Cafe+Hegel/data=!4m7!3m6!1s0x4799db2316cd3c4f:0xdf2d40a03f073bbf!8m2!3d48.7731875!4d9.1779949!16s%2Fg%2F11tfzb_1xq!19sChIJTzzNFiPbmUcRvzsHP6BALd8?authuser=0&hl=de&rclk=1" target="_blank" title="51 bis 100 Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">Cafe Hegel</a></td>
+                            <td class="col-city" data-label="City">Stuttgart</td>
+                            <td class="col-type" data-label="Type">Café</td>
+                            <td class="num col-reviews" data-label="Reviews">798</td>
+                            <td class="num col-deleted" data-label="Deleted">~76</td>
+                            <td class="num col-pct" data-label="% Deleted">8.6% <span class="sev-badge med">🟡 Med</span></td>
+                            <td class="num col-rating" data-label="Rating">⭐ 5.0</td>
+                            <td class="num col-real" data-label="Real">⭐ 4.7</td>
+                            <td class="num col-gap" data-label="Gap">-0.35</td>
                         </tr>
                     
                 
                     
                         <tr class="severity-med">
                             
-                            <td><a href="https://www.google.de/maps/place/TATTI+Stay+%26+See/data=!4m7!3m6!1s0x4799db49ad56c0e9:0x593db45c624f39b!8m2!3d48.7743858!4d9.1772906!16s%2Fg%2F11bw4z9vts!19sChIJ6cBWrUnbmUcRm_MkxkXbkwU?authuser=0&hl=de&rclk=1" target="_blank" title="51 bis 100 Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">TATTI Stay & See</a></td>
-                            <td>Stuttgart</td>
-                            <td>Café</td>
-                            <td class="num">807</td>
-                            <td class="num">~76</td>
-                            <td class="num">8.6% <span class="sev-badge med">🟡 Med</span></td>
-                            <td class="num">⭐ 4.5</td>
-                            <td class="num">⭐ 4.2</td>
-                            <td class="num">-0.30</td>
+                            <td class="col-name"><a href="https://www.google.de/maps/place/TATTI+Stay+%26+See/data=!4m7!3m6!1s0x4799db49ad56c0e9:0x593db45c624f39b!8m2!3d48.7743858!4d9.1772906!16s%2Fg%2F11bw4z9vts!19sChIJ6cBWrUnbmUcRm_MkxkXbkwU?authuser=0&hl=de&rclk=1" target="_blank" title="51 bis 100 Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">TATTI Stay & See</a></td>
+                            <td class="col-city" data-label="City">Stuttgart</td>
+                            <td class="col-type" data-label="Type">Café</td>
+                            <td class="num col-reviews" data-label="Reviews">807</td>
+                            <td class="num col-deleted" data-label="Deleted">~76</td>
+                            <td class="num col-pct" data-label="% Deleted">8.6% <span class="sev-badge med">🟡 Med</span></td>
+                            <td class="num col-rating" data-label="Rating">⭐ 4.5</td>
+                            <td class="num col-real" data-label="Real">⭐ 4.2</td>
+                            <td class="num col-gap" data-label="Gap">-0.30</td>
                         </tr>
                     
                 
                     
                         <tr class="severity-med">
                             
-                            <td><a href="https://www.google.de/maps/place/Adana+Sofrasi/data=!4m7!3m6!1s0x4799db4f3b9601cf:0x75b52298bfe1e2c4!8m2!3d48.7713889!4d9.17!16s%2Fg%2F1tfg2183!19sChIJzwGWO0_bmUcRxOLhv5gitXU?authuser=0&hl=de&rclk=1" target="_blank" title="51 bis 100 Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">Adana Sofrasi</a></td>
-                            <td>Stuttgart</td>
-                            <td>Café</td>
-                            <td class="num">1020</td>
-                            <td class="num">~76</td>
-                            <td class="num">6.9% <span class="sev-badge med">🟡 Med</span></td>
-                            <td class="num">⭐ 4.4</td>
-                            <td class="num">⭐ 4.2</td>
-                            <td class="num">-0.23</td>
+                            <td class="col-name"><a href="https://www.google.de/maps/place/Adana+Sofrasi/data=!4m7!3m6!1s0x4799db4f3b9601cf:0x75b52298bfe1e2c4!8m2!3d48.7713889!4d9.17!16s%2Fg%2F1tfg2183!19sChIJzwGWO0_bmUcRxOLhv5gitXU?authuser=0&hl=de&rclk=1" target="_blank" title="51 bis 100 Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">Adana Sofrasi</a></td>
+                            <td class="col-city" data-label="City">Stuttgart</td>
+                            <td class="col-type" data-label="Type">Café</td>
+                            <td class="num col-reviews" data-label="Reviews">1020</td>
+                            <td class="num col-deleted" data-label="Deleted">~76</td>
+                            <td class="num col-pct" data-label="% Deleted">6.9% <span class="sev-badge med">🟡 Med</span></td>
+                            <td class="num col-rating" data-label="Rating">⭐ 4.4</td>
+                            <td class="num col-real" data-label="Real">⭐ 4.2</td>
+                            <td class="num col-gap" data-label="Gap">-0.23</td>
                         </tr>
                     
                 
                     
                         <tr class="severity-med">
                             
-                            <td><a href="https://www.google.de/maps/place/KALA+-+Diskothek+%2F+Shisha+%2F+Lounge+%2F+Bar/data=!4m7!3m6!1s0x4799db3629bb889b:0x93ae98c69af4f3c1!8m2!3d48.7772197!4d9.1735749!16s%2Fg%2F11c550qgj1!19sChIJm4i7KTbbmUcRwfP0msaYrpM?authuser=0&hl=de&rclk=1" target="_blank" title="21 bis 50 Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">KALA - Diskothek / Shisha / Lounge / Bar</a></td>
-                            <td>Stuttgart</td>
-                            <td>Café</td>
-                            <td class="num">608</td>
-                            <td class="num">~36</td>
-                            <td class="num">5.5% <span class="sev-badge med">🟡 Med</span></td>
-                            <td class="num">⭐ 4.7</td>
-                            <td class="num">⭐ 4.5</td>
-                            <td class="num">-0.20</td>
+                            <td class="col-name"><a href="https://www.google.de/maps/place/KALA+-+Diskothek+%2F+Shisha+%2F+Lounge+%2F+Bar/data=!4m7!3m6!1s0x4799db3629bb889b:0x93ae98c69af4f3c1!8m2!3d48.7772197!4d9.1735749!16s%2Fg%2F11c550qgj1!19sChIJm4i7KTbbmUcRwfP0msaYrpM?authuser=0&hl=de&rclk=1" target="_blank" title="21 bis 50 Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">KALA - Diskothek / Shisha / Lounge / Bar</a></td>
+                            <td class="col-city" data-label="City">Stuttgart</td>
+                            <td class="col-type" data-label="Type">Café</td>
+                            <td class="num col-reviews" data-label="Reviews">608</td>
+                            <td class="num col-deleted" data-label="Deleted">~36</td>
+                            <td class="num col-pct" data-label="% Deleted">5.5% <span class="sev-badge med">🟡 Med</span></td>
+                            <td class="num col-rating" data-label="Rating">⭐ 4.7</td>
+                            <td class="num col-real" data-label="Real">⭐ 4.5</td>
+                            <td class="num col-gap" data-label="Gap">-0.20</td>
                         </tr>
                     
                 
                     
                         <tr class="">
                             
-                            <td><a href="https://www.google.de/maps/place/Energetic+life+Restaurant/data=!4m7!3m6!1s0x4799dbf2d81ec2ed:0x156da0e31d6f0782!8m2!3d48.77577!4d9.17756!16s%2Fg%2F11rjbc4vcd!19sChIJ7cIe2PLbmUcRggdvHeOgbRU?authuser=0&hl=de&rclk=1" target="_blank" title="21 bis 50 Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">Energetic life Restaurant</a></td>
+                            <td class="col-name"><a href="https://www.google.de/maps/place/Energetic+life+Restaurant/data=!4m7!3m6!1s0x4799dbf2d81ec2ed:0x156da0e31d6f0782!8m2!3d48.77577!4d9.17756!16s%2Fg%2F11rjbc4vcd!19sChIJ7cIe2PLbmUcRggdvHeOgbRU?authuser=0&hl=de&rclk=1" target="_blank" title="21 bis 50 Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">Energetic life Restaurant</a></td>
                             <td>Stuttgart</td>
                             <td>Café</td>
                             <td class="num">990</td>
@@ -295,7 +335,7 @@ td a:hover { text-decoration: underline; }
                     
                         <tr class="">
                             
-                            <td><a href="https://www.google.de/maps/place/Nesenbach+Brauhaus+%26+Eventlocation+-+Stuttgart/data=!4m7!3m6!1s0x4799db4abe4fc931:0xc23ee216d97d8a75!8m2!3d48.7760766!4d9.1802283!16s%2Fg%2F11g8dh6mkw!19sChIJMclPvkrbmUcRdYp92RbiPsI?authuser=0&hl=de&rclk=1" target="_blank" title="21 bis 50 Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">Nesenbach Brauhaus & Eventlocation - Stuttgart</a></td>
+                            <td class="col-name"><a href="https://www.google.de/maps/place/Nesenbach+Brauhaus+%26+Eventlocation+-+Stuttgart/data=!4m7!3m6!1s0x4799db4abe4fc931:0xc23ee216d97d8a75!8m2!3d48.7760766!4d9.1802283!16s%2Fg%2F11g8dh6mkw!19sChIJMclPvkrbmUcRdYp92RbiPsI?authuser=0&hl=de&rclk=1" target="_blank" title="21 bis 50 Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">Nesenbach Brauhaus & Eventlocation - Stuttgart</a></td>
                             <td>Stuttgart</td>
                             <td>Café</td>
                             <td class="num">999</td>
@@ -310,7 +350,7 @@ td a:hover { text-decoration: underline; }
                     
                         <tr class="">
                             
-                            <td><a href="https://www.google.de/maps/place/Academie+der+Sch%C3%B6nsten+K%C3%BCnste+Gastronomie+%2F+Stuttgart/data=!4m7!3m6!1s0x4799c4b569599075:0x34e5cadd2abd0787!8m2!3d48.7753555!4d9.1841042!16s%2Fg%2F1tfk3d4s!19sChIJdZBZabXEmUcRhwe9Kt3K5TQ?authuser=0&hl=de&rclk=1" target="_blank" title="21 bis 50 Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">Academie der Schönsten Künste Gastronomie / Stuttgart</a></td>
+                            <td class="col-name"><a href="https://www.google.de/maps/place/Academie+der+Sch%C3%B6nsten+K%C3%BCnste+Gastronomie+%2F+Stuttgart/data=!4m7!3m6!1s0x4799c4b569599075:0x34e5cadd2abd0787!8m2!3d48.7753555!4d9.1841042!16s%2Fg%2F1tfk3d4s!19sChIJdZBZabXEmUcRhwe9Kt3K5TQ?authuser=0&hl=de&rclk=1" target="_blank" title="21 bis 50 Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">Academie der Schönsten Künste Gastronomie / Stuttgart</a></td>
                             <td>Stuttgart</td>
                             <td>Café</td>
                             <td class="num">1123</td>
@@ -325,7 +365,7 @@ td a:hover { text-decoration: underline; }
                     
                         <tr class="">
                             
-                            <td><a href="https://www.google.de/maps/place/Gian+Paolo+e+Marco/data=!4m7!3m6!1s0x4799db6b06ad0feb:0xa65412a88853a4c3!8m2!3d48.77431!4d9.17682!16s%2Fg%2F11rcnwljkp!19sChIJ6w-tBmvbmUcRw6RTiKgSVKY?authuser=0&hl=de&rclk=1" target="_blank" title="Zwei bis fünf Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">Gian Paolo e Marco</a></td>
+                            <td class="col-name"><a href="https://www.google.de/maps/place/Gian+Paolo+e+Marco/data=!4m7!3m6!1s0x4799db6b06ad0feb:0xa65412a88853a4c3!8m2!3d48.77431!4d9.17682!16s%2Fg%2F11rcnwljkp!19sChIJ6w-tBmvbmUcRw6RTiKgSVKY?authuser=0&hl=de&rclk=1" target="_blank" title="Zwei bis fünf Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">Gian Paolo e Marco</a></td>
                             <td>Stuttgart</td>
                             <td>Café</td>
                             <td class="num">123</td>
@@ -340,7 +380,7 @@ td a:hover { text-decoration: underline; }
                     
                         <tr class="">
                             
-                            <td><a href="https://www.google.de/maps/place/Sky+Beach+Stuttgart/data=!4m7!3m6!1s0x4799db339b7b004f:0x1801c120728eb57d!8m2!3d48.7819459!4d9.1809145!16s%2Fg%2F11d_1nbw91!19sChIJTwB7mzPbmUcRfbWOciDBARg?authuser=0&hl=de&rclk=1" target="_blank" title="21 bis 50 Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">Sky Beach Stuttgart</a></td>
+                            <td class="col-name"><a href="https://www.google.de/maps/place/Sky+Beach+Stuttgart/data=!4m7!3m6!1s0x4799db339b7b004f:0x1801c120728eb57d!8m2!3d48.7819459!4d9.1809145!16s%2Fg%2F11d_1nbw91!19sChIJTwB7mzPbmUcRfbWOciDBARg?authuser=0&hl=de&rclk=1" target="_blank" title="21 bis 50 Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">Sky Beach Stuttgart</a></td>
                             <td>Stuttgart</td>
                             <td>Café</td>
                             <td class="num">1357</td>
@@ -355,7 +395,7 @@ td a:hover { text-decoration: underline; }
                     
                         <tr class="">
                             
-                            <td><a href="https://www.google.de/maps/place/Carls+Brauhaus/data=!4m7!3m6!1s0x4799db34ff6c6b77:0x90c6c1bff759b0aa!8m2!3d48.7794633!4d9.1799805!16s%2Fg%2F11bbrkxbmw!19sChIJd2ts_zTbmUcRqrBZ97_BxpA?authuser=0&hl=de&rclk=1" target="_blank" title="250 Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">Carls Brauhaus</a></td>
+                            <td class="col-name"><a href="https://www.google.de/maps/place/Carls+Brauhaus/data=!4m7!3m6!1s0x4799db34ff6c6b77:0x90c6c1bff759b0aa!8m2!3d48.7794633!4d9.1799805!16s%2Fg%2F11bbrkxbmw!19sChIJd2ts_zTbmUcRqrBZ97_BxpA?authuser=0&hl=de&rclk=1" target="_blank" title="250 Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">Carls Brauhaus</a></td>
                             <td>Stuttgart</td>
                             <td>Café</td>
                             <td class="num">10483</td>
@@ -370,7 +410,7 @@ td a:hover { text-decoration: underline; }
                     
                         <tr class="">
                             
-                            <td><a href="https://www.google.de/maps/place/Gustav+Caf%C3%A9+%26+Bar+-+Stuttgart/data=!4m7!3m6!1s0x4799db022e4fa20b:0x318e7a3fa3677e5c!8m2!3d48.7711371!4d9.1574757!16s%2Fg%2F11g0gn2__m!19sChIJC6JPLgLbmUcRXH5noz96jjE?authuser=0&hl=de&rclk=1" target="_blank" title="11 bis 20 Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">Gustav Café & Bar - Stuttgart</a></td>
+                            <td class="col-name"><a href="https://www.google.de/maps/place/Gustav+Caf%C3%A9+%26+Bar+-+Stuttgart/data=!4m7!3m6!1s0x4799db022e4fa20b:0x318e7a3fa3677e5c!8m2!3d48.7711371!4d9.1574757!16s%2Fg%2F11g0gn2__m!19sChIJC6JPLgLbmUcRXH5noz96jjE?authuser=0&hl=de&rclk=1" target="_blank" title="11 bis 20 Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">Gustav Café & Bar - Stuttgart</a></td>
                             <td>Stuttgart</td>
                             <td>Café</td>
                             <td class="num">709</td>
@@ -385,7 +425,7 @@ td a:hover { text-decoration: underline; }
                     
                         <tr class="">
                             
-                            <td><a href="https://www.google.de/maps/place/Take+a+Break/data=!4m7!3m6!1s0x4799db007a75fcf7:0x6a889513c0e995c1!8m2!3d48.7721302!4d9.1763249!16s%2Fg%2F11vxmymwtc!19sChIJ9_x1egDbmUcRwZXpwBOViGo?authuser=0&hl=de&rclk=1" target="_blank" title="Zwei bis fünf Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">Take a Break</a></td>
+                            <td class="col-name"><a href="https://www.google.de/maps/place/Take+a+Break/data=!4m7!3m6!1s0x4799db007a75fcf7:0x6a889513c0e995c1!8m2!3d48.7721302!4d9.1763249!16s%2Fg%2F11vxmymwtc!19sChIJ9_x1egDbmUcRwZXpwBOViGo?authuser=0&hl=de&rclk=1" target="_blank" title="Zwei bis fünf Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">Take a Break</a></td>
                             <td>Stuttgart</td>
                             <td>Café</td>
                             <td class="num">173</td>
@@ -400,7 +440,7 @@ td a:hover { text-decoration: underline; }
                     
                         <tr class="">
                             
-                            <td><a href="https://www.google.de/maps/place/Trollinger+Stuttgart/data=!4m7!3m6!1s0x4799db460d59e815:0x3ef7294babfe151e!8m2!3d48.7729679!4d9.1663983!16s%2Fg%2F1tdvt8j4!19sChIJFehZDUbbmUcRHhX-q0sp9z4?authuser=0&hl=de&rclk=1" target="_blank" title="21 bis 50 Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">Trollinger Stuttgart</a></td>
+                            <td class="col-name"><a href="https://www.google.de/maps/place/Trollinger+Stuttgart/data=!4m7!3m6!1s0x4799db460d59e815:0x3ef7294babfe151e!8m2!3d48.7729679!4d9.1663983!16s%2Fg%2F1tdvt8j4!19sChIJFehZDUbbmUcRHhX-q0sp9z4?authuser=0&hl=de&rclk=1" target="_blank" title="21 bis 50 Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">Trollinger Stuttgart</a></td>
                             <td>Stuttgart</td>
                             <td>Café</td>
                             <td class="num">1950</td>
@@ -415,7 +455,7 @@ td a:hover { text-decoration: underline; }
                     
                         <tr class="">
                             
-                            <td><a href="https://www.google.de/maps/place/AMADEUS+Restaurant+%26+Bar/data=!4m7!3m6!1s0x4799db4ab2ed0705:0x792fa87131d4292a!8m2!3d48.77576!4d9.182181!16s%2Fg%2F1tj5ppyf!19sChIJBQftskrbmUcRKinUMXGoL3k?authuser=0&hl=de&rclk=1" target="_blank" title="21 bis 50 Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">AMADEUS Restaurant & Bar</a></td>
+                            <td class="col-name"><a href="https://www.google.de/maps/place/AMADEUS+Restaurant+%26+Bar/data=!4m7!3m6!1s0x4799db4ab2ed0705:0x792fa87131d4292a!8m2!3d48.77576!4d9.182181!16s%2Fg%2F1tj5ppyf!19sChIJBQftskrbmUcRKinUMXGoL3k?authuser=0&hl=de&rclk=1" target="_blank" title="21 bis 50 Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">AMADEUS Restaurant & Bar</a></td>
                             <td>Stuttgart</td>
                             <td>Café</td>
                             <td class="num">2022</td>
@@ -430,7 +470,7 @@ td a:hover { text-decoration: underline; }
                     
                         <tr class="">
                             
-                            <td><a href="https://www.google.de/maps/place/Bruno+Caf%C3%A9+%26+Bar/data=!4m7!3m6!1s0x4799dbafb79de0cf:0x9929bffa048c5047!8m2!3d48.765911!4d9.1689291!16s%2Fg%2F11tr__t2dl!19sChIJz-Cdt6_bmUcRR1CMBPq_KZk?authuser=0&hl=de&rclk=1" target="_blank" title="Zwei bis fünf Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">Bruno Café & Bar</a></td>
+                            <td class="col-name"><a href="https://www.google.de/maps/place/Bruno+Caf%C3%A9+%26+Bar/data=!4m7!3m6!1s0x4799dbafb79de0cf:0x9929bffa048c5047!8m2!3d48.765911!4d9.1689291!16s%2Fg%2F11tr__t2dl!19sChIJz-Cdt6_bmUcRR1CMBPq_KZk?authuser=0&hl=de&rclk=1" target="_blank" title="Zwei bis fünf Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">Bruno Café & Bar</a></td>
                             <td>Stuttgart</td>
                             <td>Café</td>
                             <td class="num">234</td>
@@ -445,7 +485,7 @@ td a:hover { text-decoration: underline; }
                     
                         <tr class="">
                             
-                            <td><a href="https://www.google.de/maps/place/Platzhirsch/data=!4m7!3m6!1s0x4799db4bb9f7dc07:0xaba291b8793796b6!8m2!3d48.7736195!4d9.1770427!16s%2Fg%2F1thkw731!19sChIJB9z3uUvbmUcRtpY3ebiRoqs?authuser=0&hl=de&rclk=1" target="_blank" title="11 bis 20 Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">Platzhirsch</a></td>
+                            <td class="col-name"><a href="https://www.google.de/maps/place/Platzhirsch/data=!4m7!3m6!1s0x4799db4bb9f7dc07:0xaba291b8793796b6!8m2!3d48.7736195!4d9.1770427!16s%2Fg%2F1thkw731!19sChIJB9z3uUvbmUcRtpY3ebiRoqs?authuser=0&hl=de&rclk=1" target="_blank" title="11 bis 20 Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">Platzhirsch</a></td>
                             <td>Stuttgart</td>
                             <td>Café</td>
                             <td class="num">1148</td>
@@ -460,7 +500,7 @@ td a:hover { text-decoration: underline; }
                     
                         <tr class="">
                             
-                            <td><a href="https://www.google.de/maps/place/Netzer/data=!4m7!3m6!1s0x4799db463c897691:0x65b23ca17a82d04f!8m2!3d48.774036!4d9.1678099!16s%2Fg%2F11cmtrc5hq!19sChIJkXaJPEbbmUcRT9CCeqE8smU?authuser=0&hl=de&rclk=1" target="_blank" title="11 bis 20 Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">Netzer</a></td>
+                            <td class="col-name"><a href="https://www.google.de/maps/place/Netzer/data=!4m7!3m6!1s0x4799db463c897691:0x65b23ca17a82d04f!8m2!3d48.774036!4d9.1678099!16s%2Fg%2F11cmtrc5hq!19sChIJkXaJPEbbmUcRT9CCeqE8smU?authuser=0&hl=de&rclk=1" target="_blank" title="11 bis 20 Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">Netzer</a></td>
                             <td>Stuttgart</td>
                             <td>Café</td>
                             <td class="num">1508</td>
@@ -475,7 +515,7 @@ td a:hover { text-decoration: underline; }
                     
                         <tr class="">
                             
-                            <td><a href="https://www.google.de/maps/place/Glora+Kaffeehaus+%2F+Stuttgart/data=!4m7!3m6!1s0x4799db49b8cea033:0x8a840692284035b9!8m2!3d48.7758012!4d9.1737593!16s%2Fg%2F1tx1s4mk!19sChIJM6DOuEnbmUcRuTVAKJIGhIo?authuser=0&hl=de&rclk=1" target="_blank" title="Sechs bis zehn Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">Glora Kaffeehaus / Stuttgart</a></td>
+                            <td class="col-name"><a href="https://www.google.de/maps/place/Glora+Kaffeehaus+%2F+Stuttgart/data=!4m7!3m6!1s0x4799db49b8cea033:0x8a840692284035b9!8m2!3d48.7758012!4d9.1737593!16s%2Fg%2F1tx1s4mk!19sChIJM6DOuEnbmUcRuTVAKJIGhIo?authuser=0&hl=de&rclk=1" target="_blank" title="Sechs bis zehn Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">Glora Kaffeehaus / Stuttgart</a></td>
                             <td>Stuttgart</td>
                             <td>Café</td>
                             <td class="num">944</td>
@@ -490,7 +530,7 @@ td a:hover { text-decoration: underline; }
                     
                         <tr class="">
                             
-                            <td><a href="https://www.google.de/maps/place/Alte+Kanzlei+Stuttgart/data=!4m7!3m6!1s0x4799db3590f66031:0x9cd8cf5a853d3137!8m2!3d48.7774891!4d9.1786788!16s%2Fg%2F11dylytvmj!19sChIJMWD2kDXbmUcRNzE9hVrP2Jw?authuser=0&hl=de&rclk=1" target="_blank" title="11 bis 20 Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">Alte Kanzlei Stuttgart</a></td>
+                            <td class="col-name"><a href="https://www.google.de/maps/place/Alte+Kanzlei+Stuttgart/data=!4m7!3m6!1s0x4799db3590f66031:0x9cd8cf5a853d3137!8m2!3d48.7774891!4d9.1786788!16s%2Fg%2F11dylytvmj!19sChIJMWD2kDXbmUcRNzE9hVrP2Jw?authuser=0&hl=de&rclk=1" target="_blank" title="11 bis 20 Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">Alte Kanzlei Stuttgart</a></td>
                             <td>Stuttgart</td>
                             <td>Café</td>
                             <td class="num">3589</td>
@@ -505,7 +545,7 @@ td a:hover { text-decoration: underline; }
                     
                         <tr class="">
                             
-                            <td><a href="https://www.google.de/maps/place/Poffers+Caf%C3%A9+Stuttgart/data=!4m7!3m6!1s0x4799c4cdda8233e9:0x46dced0688d2f164!8m2!3d48.7839282!4d9.1906208!16s%2Fg%2F11b6gng8h0!19sChIJ6TOC2s3EmUcRZPHSiAbt3EY?authuser=0&hl=de&rclk=1" target="_blank" title="Zwei bis fünf Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">Poffers Café Stuttgart</a></td>
+                            <td class="col-name"><a href="https://www.google.de/maps/place/Poffers+Caf%C3%A9+Stuttgart/data=!4m7!3m6!1s0x4799c4cdda8233e9:0x46dced0688d2f164!8m2!3d48.7839282!4d9.1906208!16s%2Fg%2F11b6gng8h0!19sChIJ6TOC2s3EmUcRZPHSiAbt3EY?authuser=0&hl=de&rclk=1" target="_blank" title="Zwei bis fünf Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">Poffers Café Stuttgart</a></td>
                             <td>Stuttgart</td>
                             <td>Café</td>
                             <td class="num">1478</td>
@@ -706,67 +746,67 @@ td a:hover { text-decoration: underline; }
                     
                         <tr class="severity-high">
                             
-                            <td><a href="https://www.google.de/maps/place/Greek+Cuisine/data=!4m7!3m6!1s0x4799dbecd4473287:0xecfae775eda80306!8m2!3d48.7730486!4d9.177907!16s%2Fg%2F11jn2dj07q!19sChIJhzJH1OzbmUcRBgOo7XXn-uw?authuser=0&hl=de&rclk=1" target="_blank" title="51 bis 100 Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">Greek Cuisine</a></td>
-                            <td>Stuttgart</td>
-                            <td>restaurant</td>
-                            <td class="num">587</td>
-                            <td class="num">~76</td>
-                            <td class="num">11.4% <span class="sev-badge high">🔴 High</span></td>
-                            <td class="num">⭐ 4.8</td>
-                            <td class="num">⭐ 4.4</td>
-                            <td class="num">-0.43</td>
+                            <td class="col-name"><a href="https://www.google.de/maps/place/Greek+Cuisine/data=!4m7!3m6!1s0x4799dbecd4473287:0xecfae775eda80306!8m2!3d48.7730486!4d9.177907!16s%2Fg%2F11jn2dj07q!19sChIJhzJH1OzbmUcRBgOo7XXn-uw?authuser=0&hl=de&rclk=1" target="_blank" title="51 bis 100 Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">Greek Cuisine</a></td>
+                            <td class="col-city" data-label="City">Stuttgart</td>
+                            <td class="col-type" data-label="Type">restaurant</td>
+                            <td class="num col-reviews" data-label="Reviews">587</td>
+                            <td class="num col-deleted" data-label="Deleted">~76</td>
+                            <td class="num col-pct" data-label="% Deleted">11.4% <span class="sev-badge high">🔴 High</span></td>
+                            <td class="num col-rating" data-label="Rating">⭐ 4.8</td>
+                            <td class="num col-real" data-label="Real">⭐ 4.4</td>
+                            <td class="num col-gap" data-label="Gap">-0.43</td>
                         </tr>
                     
                 
                     
                         <tr class="severity-med">
                             
-                            <td><a href="https://www.google.de/maps/place/Don+Via+Restaurant+Stuttgart/data=!4m7!3m6!1s0x4799db6f31561689:0x39b36c761fae146d!8m2!3d48.7771087!4d9.1733872!16s%2Fg%2F11h9jf1604!19sChIJiRZWMW_bmUcRbRSuH3Zsszk?authuser=0&hl=de&rclk=1" target="_blank" title="51 bis 100 Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">Don Via Restaurant Stuttgart</a></td>
-                            <td>Stuttgart</td>
-                            <td>restaurant</td>
-                            <td class="num">995</td>
-                            <td class="num">~76</td>
-                            <td class="num">7.1% <span class="sev-badge med">🟡 Med</span></td>
-                            <td class="num">⭐ 4.7</td>
-                            <td class="num">⭐ 4.4</td>
-                            <td class="num">-0.26</td>
+                            <td class="col-name"><a href="https://www.google.de/maps/place/Don+Via+Restaurant+Stuttgart/data=!4m7!3m6!1s0x4799db6f31561689:0x39b36c761fae146d!8m2!3d48.7771087!4d9.1733872!16s%2Fg%2F11h9jf1604!19sChIJiRZWMW_bmUcRbRSuH3Zsszk?authuser=0&hl=de&rclk=1" target="_blank" title="51 bis 100 Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">Don Via Restaurant Stuttgart</a></td>
+                            <td class="col-city" data-label="City">Stuttgart</td>
+                            <td class="col-type" data-label="Type">restaurant</td>
+                            <td class="num col-reviews" data-label="Reviews">995</td>
+                            <td class="num col-deleted" data-label="Deleted">~76</td>
+                            <td class="num col-pct" data-label="% Deleted">7.1% <span class="sev-badge med">🟡 Med</span></td>
+                            <td class="num col-rating" data-label="Rating">⭐ 4.7</td>
+                            <td class="num col-real" data-label="Real">⭐ 4.4</td>
+                            <td class="num col-gap" data-label="Gap">-0.26</td>
                         </tr>
                     
                 
                     
                         <tr class="severity-med">
                             
-                            <td><a href="https://www.google.de/maps/place/Banh+Mi+%26+Bubbles/data=!4m7!3m6!1s0x4799dba2c8bee78f:0xa23cc9a684c0da45!8m2!3d48.7729772!4d9.1758502!16s%2Fg%2F11lkh8m1ns!19sChIJj-e-yKLbmUcRRdrAhKbJPKI?authuser=0&hl=de&rclk=1" target="_blank" title="21 bis 50 Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">Banh Mi & Bubbles</a></td>
-                            <td>Stuttgart</td>
-                            <td>restaurant</td>
-                            <td class="num">512</td>
-                            <td class="num">~36</td>
-                            <td class="num">6.5% <span class="sev-badge med">🟡 Med</span></td>
-                            <td class="num">⭐ 4.7</td>
-                            <td class="num">⭐ 4.5</td>
-                            <td class="num">-0.24</td>
+                            <td class="col-name"><a href="https://www.google.de/maps/place/Banh+Mi+%26+Bubbles/data=!4m7!3m6!1s0x4799dba2c8bee78f:0xa23cc9a684c0da45!8m2!3d48.7729772!4d9.1758502!16s%2Fg%2F11lkh8m1ns!19sChIJj-e-yKLbmUcRRdrAhKbJPKI?authuser=0&hl=de&rclk=1" target="_blank" title="21 bis 50 Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">Banh Mi & Bubbles</a></td>
+                            <td class="col-city" data-label="City">Stuttgart</td>
+                            <td class="col-type" data-label="Type">restaurant</td>
+                            <td class="num col-reviews" data-label="Reviews">512</td>
+                            <td class="num col-deleted" data-label="Deleted">~36</td>
+                            <td class="num col-pct" data-label="% Deleted">6.5% <span class="sev-badge med">🟡 Med</span></td>
+                            <td class="num col-rating" data-label="Rating">⭐ 4.7</td>
+                            <td class="num col-real" data-label="Real">⭐ 4.5</td>
+                            <td class="num col-gap" data-label="Gap">-0.24</td>
                         </tr>
                     
                 
                     
                         <tr class="severity-med">
                             
-                            <td><a href="https://www.google.de/maps/place/WIP+Sushi+Lounge/data=!4m7!3m6!1s0x4799c4b52d9a89db:0x322b676810900861!8m2!3d48.7743772!4d9.1822775!16s%2Fg%2F11b77pyz21!19sChIJ24maLbXEmUcRYQiQEGhnKzI?authuser=0&hl=de&rclk=1" target="_blank" title="21 bis 50 Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">WIP Sushi Lounge</a></td>
-                            <td>Stuttgart</td>
-                            <td>restaurant</td>
-                            <td class="num">634</td>
-                            <td class="num">~36</td>
-                            <td class="num">5.3% <span class="sev-badge med">🟡 Med</span></td>
-                            <td class="num">⭐ 4.8</td>
-                            <td class="num">⭐ 4.6</td>
-                            <td class="num">-0.20</td>
+                            <td class="col-name"><a href="https://www.google.de/maps/place/WIP+Sushi+Lounge/data=!4m7!3m6!1s0x4799c4b52d9a89db:0x322b676810900861!8m2!3d48.7743772!4d9.1822775!16s%2Fg%2F11b77pyz21!19sChIJ24maLbXEmUcRYQiQEGhnKzI?authuser=0&hl=de&rclk=1" target="_blank" title="21 bis 50 Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">WIP Sushi Lounge</a></td>
+                            <td class="col-city" data-label="City">Stuttgart</td>
+                            <td class="col-type" data-label="Type">restaurant</td>
+                            <td class="num col-reviews" data-label="Reviews">634</td>
+                            <td class="num col-deleted" data-label="Deleted">~36</td>
+                            <td class="num col-pct" data-label="% Deleted">5.3% <span class="sev-badge med">🟡 Med</span></td>
+                            <td class="num col-rating" data-label="Rating">⭐ 4.8</td>
+                            <td class="num col-real" data-label="Real">⭐ 4.6</td>
+                            <td class="num col-gap" data-label="Gap">-0.20</td>
                         </tr>
                     
                 
                     
                         <tr class="">
                             
-                            <td><a href="https://www.google.de/maps/place/Tayfun+Kebap/data=!4m7!3m6!1s0x4799dbe2172ceb7d:0xf9c583b16cab8285!8m2!3d48.773154!4d9.1750764!16s%2Fg%2F11pcpxmqvc!19sChIJfessF-LbmUcRhYKrbLGDxfk?authuser=0&hl=de&rclk=1" target="_blank" title="21 bis 50 Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">Tayfun Kebap</a></td>
+                            <td class="col-name"><a href="https://www.google.de/maps/place/Tayfun+Kebap/data=!4m7!3m6!1s0x4799dbe2172ceb7d:0xf9c583b16cab8285!8m2!3d48.773154!4d9.1750764!16s%2Fg%2F11pcpxmqvc!19sChIJfessF-LbmUcRhYKrbLGDxfk?authuser=0&hl=de&rclk=1" target="_blank" title="21 bis 50 Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">Tayfun Kebap</a></td>
                             <td>Stuttgart</td>
                             <td>restaurant</td>
                             <td class="num">734</td>
@@ -781,7 +821,7 @@ td a:hover { text-decoration: underline; }
                     
                         <tr class="">
                             
-                            <td><a href="https://www.google.de/maps/place/N14+Restaurant/data=!4m7!3m6!1s0x4799dba4388e7897:0x5080b2412c484c16!8m2!3d48.7739669!4d9.1775308!16s%2Fg%2F11r89twcsp!19sChIJl3iOOKTbmUcRFkxILEGygFA?authuser=0&hl=de&rclk=1" target="_blank" title="21 bis 50 Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">N14 Restaurant</a></td>
+                            <td class="col-name"><a href="https://www.google.de/maps/place/N14+Restaurant/data=!4m7!3m6!1s0x4799dba4388e7897:0x5080b2412c484c16!8m2!3d48.7739669!4d9.1775308!16s%2Fg%2F11r89twcsp!19sChIJl3iOOKTbmUcRFkxILEGygFA?authuser=0&hl=de&rclk=1" target="_blank" title="21 bis 50 Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">N14 Restaurant</a></td>
                             <td>Stuttgart</td>
                             <td>restaurant</td>
                             <td class="num">766</td>
@@ -796,7 +836,7 @@ td a:hover { text-decoration: underline; }
                     
                         <tr class="">
                             
-                            <td><a href="https://www.google.de/maps/place/Valle/data=!4m7!3m6!1s0x4799db31366a6a1b:0x6403c393e865f206!8m2!3d48.7823164!4d9.1759419!16s%2Fg%2F1tffc4hh!19sChIJG2pqNjHbmUcRBvJl6JPDA2Q?authuser=0&hl=de&rclk=1" target="_blank" title="101 bis 150 Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">Valle</a></td>
+                            <td class="col-name"><a href="https://www.google.de/maps/place/Valle/data=!4m7!3m6!1s0x4799db31366a6a1b:0x6403c393e865f206!8m2!3d48.7823164!4d9.1759419!16s%2Fg%2F1tffc4hh!19sChIJG2pqNjHbmUcRBvJl6JPDA2Q?authuser=0&hl=de&rclk=1" target="_blank" title="101 bis 150 Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">Valle</a></td>
                             <td>Stuttgart</td>
                             <td>restaurant</td>
                             <td class="num">3110</td>
@@ -811,7 +851,7 @@ td a:hover { text-decoration: underline; }
                     
                         <tr class="">
                             
-                            <td><a href="https://www.google.de/maps/place/Ristorante+La+Commedia/data=!4m7!3m6!1s0x4799db37cca8b86d:0x1f3742a1a96ce40e!8m2!3d48.7779656!4d9.1731045!16s%2Fg%2F1tdfm6xy!19sChIJbbiozDfbmUcRDuRsqaFCNx8?authuser=0&hl=de&rclk=1" target="_blank" title="21 bis 50 Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">Ristorante La Commedia</a></td>
+                            <td class="col-name"><a href="https://www.google.de/maps/place/Ristorante+La+Commedia/data=!4m7!3m6!1s0x4799db37cca8b86d:0x1f3742a1a96ce40e!8m2!3d48.7779656!4d9.1731045!16s%2Fg%2F1tdfm6xy!19sChIJbbiozDfbmUcRDuRsqaFCNx8?authuser=0&hl=de&rclk=1" target="_blank" title="21 bis 50 Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">Ristorante La Commedia</a></td>
                             <td>Stuttgart</td>
                             <td>restaurant</td>
                             <td class="num">892</td>
@@ -826,7 +866,7 @@ td a:hover { text-decoration: underline; }
                     
                         <tr class="">
                             
-                            <td><a href="https://www.google.de/maps/place/Peeches+im+Bohnenviertel/data=!4m7!3m6!1s0x4799c4b4e1fd5567:0xc3a7c4e55e7c26b9!8m2!3d48.7738195!4d9.1835195!16s%2Fg%2F1tdxzvwc!19sChIJZ1X94bTEmUcRuSZ8XuXEp8M?authuser=0&hl=de&rclk=1" target="_blank" title="Zwei bis fünf Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">Peeches im Bohnenviertel</a></td>
+                            <td class="col-name"><a href="https://www.google.de/maps/place/Peeches+im+Bohnenviertel/data=!4m7!3m6!1s0x4799c4b4e1fd5567:0xc3a7c4e55e7c26b9!8m2!3d48.7738195!4d9.1835195!16s%2Fg%2F1tdxzvwc!19sChIJZ1X94bTEmUcRuSZ8XuXEp8M?authuser=0&hl=de&rclk=1" target="_blank" title="Zwei bis fünf Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">Peeches im Bohnenviertel</a></td>
                             <td>Stuttgart</td>
                             <td>restaurant</td>
                             <td class="num">175</td>
@@ -841,7 +881,7 @@ td a:hover { text-decoration: underline; }
                     
                         <tr class="">
                             
-                            <td><a href="https://www.google.de/maps/place/IL+NUOVO+POSITANO/data=!4m7!3m6!1s0x4799db49b00fc06d:0x888430186c1b77b0!8m2!3d48.7751878!4d9.1731855!16s%2Fg%2F1tf7r2mc!19sChIJbcAPsEnbmUcRsHcbbBgwhIg?authuser=0&hl=de&rclk=1" target="_blank" title="11 bis 20 Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">IL NUOVO POSITANO</a></td>
+                            <td class="col-name"><a href="https://www.google.de/maps/place/IL+NUOVO+POSITANO/data=!4m7!3m6!1s0x4799db49b00fc06d:0x888430186c1b77b0!8m2!3d48.7751878!4d9.1731855!16s%2Fg%2F1tf7r2mc!19sChIJbcAPsEnbmUcRsHcbbBgwhIg?authuser=0&hl=de&rclk=1" target="_blank" title="11 bis 20 Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">IL NUOVO POSITANO</a></td>
                             <td>Stuttgart</td>
                             <td>restaurant</td>
                             <td class="num">964</td>
@@ -856,7 +896,7 @@ td a:hover { text-decoration: underline; }
                     
                         <tr class="">
                             
-                            <td><a href="https://www.google.de/maps/place/Stuttgarter+Ratskeller/data=!4m7!3m6!1s0x4799db0881d6725f:0xe4ddc7329d90ab03!8m2!3d48.7751682!4d9.1776012!16s%2Fg%2F11qh37spc_!19sChIJX3LWgQjbmUcRA6uQnTLH3eQ?authuser=0&hl=de&rclk=1" target="_blank" title="11 bis 20 Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">Stuttgarter Ratskeller</a></td>
+                            <td class="col-name"><a href="https://www.google.de/maps/place/Stuttgarter+Ratskeller/data=!4m7!3m6!1s0x4799db0881d6725f:0xe4ddc7329d90ab03!8m2!3d48.7751682!4d9.1776012!16s%2Fg%2F11qh37spc_!19sChIJX3LWgQjbmUcRA6uQnTLH3eQ?authuser=0&hl=de&rclk=1" target="_blank" title="11 bis 20 Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">Stuttgarter Ratskeller</a></td>
                             <td>Stuttgart</td>
                             <td>restaurant</td>
                             <td class="num">1019</td>
@@ -871,7 +911,7 @@ td a:hover { text-decoration: underline; }
                     
                         <tr class="">
                             
-                            <td><a href="https://www.google.de/maps/place/LIST+Caf%C3%A9+%26+Vinothek/data=!4m7!3m6!1s0x4799db53e17d8667:0xae9450fe4233b1b6!8m2!3d48.7633097!4d9.1737625!16s%2Fg%2F1tgdgywt!19sChIJZ4Z94VPbmUcRtrEzQv5QlK4?authuser=0&hl=de&rclk=1" target="_blank" title="Sechs bis zehn Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">LIST Café & Vinothek</a></td>
+                            <td class="col-name"><a href="https://www.google.de/maps/place/LIST+Caf%C3%A9+%26+Vinothek/data=!4m7!3m6!1s0x4799db53e17d8667:0xae9450fe4233b1b6!8m2!3d48.7633097!4d9.1737625!16s%2Fg%2F1tgdgywt!19sChIJZ4Z94VPbmUcRtrEzQv5QlK4?authuser=0&hl=de&rclk=1" target="_blank" title="Sechs bis zehn Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">LIST Café & Vinothek</a></td>
                             <td>Stuttgart</td>
                             <td>restaurant</td>
                             <td class="num">585</td>
@@ -886,7 +926,7 @@ td a:hover { text-decoration: underline; }
                     
                         <tr class="">
                             
-                            <td><a href="https://www.google.de/maps/place/Gasthaus+B%C3%A4ren/data=!4m7!3m6!1s0x4799db48b9e4844b:0xa479b8aab3a51499!8m2!3d48.7729805!4d9.169853!16s%2Fg%2F11g6xwx1sh!19sChIJS4TkuUjbmUcRmRSls6q4eaQ?authuser=0&hl=de&rclk=1" target="_blank" title="Zwei bis fünf Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">Gasthaus Bären</a></td>
+                            <td class="col-name"><a href="https://www.google.de/maps/place/Gasthaus+B%C3%A4ren/data=!4m7!3m6!1s0x4799db48b9e4844b:0xa479b8aab3a51499!8m2!3d48.7729805!4d9.169853!16s%2Fg%2F11g6xwx1sh!19sChIJS4TkuUjbmUcRmRSls6q4eaQ?authuser=0&hl=de&rclk=1" target="_blank" title="Zwei bis fünf Bewertungen aufgrund von Beschwerden wegen Diffamierung entfernt.">Gasthaus Bären</a></td>
                             <td>Stuttgart</td>
                             <td>restaurant</td>
                             <td class="num">2196</td>
@@ -1095,15 +1135,15 @@ function renderTable() {
         const cls = severityClass(v.percentage_deleted);
         const notice = v.review_notice ? ` title="${esc(v.review_notice)}"` : "";
         return `<tr class="${cls}">
-            <td><a href="${v.url}" target="_blank"${notice}>${esc(v.name)}</a></td>
-            <td>${esc(v.city)}</td>
-            <td>${esc(v.venue_type)}</td>
-            <td class="num">${v.total_reviews.toLocaleString()}</td>
-            <td class="num">${v.deleted_estimate > 0 ? "~" + Math.round(v.deleted_estimate) : "\u2014"}</td>
-            <td class="num">${v.percentage_deleted > 0 ? v.percentage_deleted.toFixed(1) + "%" : "\u2014"} ${severityBadge(v.percentage_deleted)}</td>
-            <td class="num">\u2B50 ${v.current_rating || "\u2014"}</td>
-            <td class="num">${v.real_score ? "\u2B50 " + v.real_score.toFixed(1) : "\u2014"}</td>
-            <td class="num">${v.rating_gap > 0 ? "-" + v.rating_gap.toFixed(2) : "\u2014"}</td>
+            <td class="col-name"><a href="${v.url}" target="_blank"${notice}>${esc(v.name)}</a></td>
+            <td class="col-city" data-label="City">${esc(v.city)}</td>
+            <td class="col-type" data-label="Type">${esc(v.venue_type)}</td>
+            <td class="num col-reviews" data-label="Reviews">${v.total_reviews.toLocaleString()}</td>
+            <td class="num col-deleted" data-label="Deleted">${v.deleted_estimate > 0 ? "~" + Math.round(v.deleted_estimate) : "\u2014"}</td>
+            <td class="num col-pct" data-label="% Deleted">${v.percentage_deleted > 0 ? v.percentage_deleted.toFixed(1) + "%" : "\u2014"} ${severityBadge(v.percentage_deleted)}</td>
+            <td class="num col-rating" data-label="Rating">\u2B50 ${v.current_rating || "\u2014"}</td>
+            <td class="num col-real" data-label="Real">${v.real_score ? "\u2B50 " + v.real_score.toFixed(1) : "\u2014"}</td>
+            <td class="num col-gap" data-label="Gap">${v.rating_gap > 0 ? "-" + v.rating_gap.toFixed(2) : "\u2014"}</td>
         </tr>`;
     }).join("");
 }

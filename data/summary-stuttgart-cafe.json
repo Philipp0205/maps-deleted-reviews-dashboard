@@ -1,0 +1,20 @@
+{
+  "city": "Stuttgart",
+  "country": "Germany",
+  "searchTerm": "Café",
+  "depth": 500,
+  "outputCsvPath": "output/deleted-reviews-stuttgart-cafe.csv",
+  "statePath": "output/state-stuttgart-cafe.json",
+  "summaryPath": "output/summary-stuttgart-cafe.json",
+  "discoveredVenues": 118,
+  "completedVenues": 118,
+  "failedVenues": 0,
+  "csvRows": 118,
+  "okRows": 95,
+  "partialRows": 23,
+  "failedRows": 0,
+  "deletionNoticesFound": 25,
+  "startedAt": "2026-05-07T23:30:53.120Z",
+  "finishedAt": "2026-05-07T23:37:11.893Z",
+  "durationMs": 378773
+}
